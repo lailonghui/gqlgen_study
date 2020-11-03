@@ -2,21 +2,23 @@
 #
 # https://gqlgen.com/getting-started/
 
+
 type Todo {
   id: ID!
   text: String!
   done: Boolean!
-  user: User!
+#  user: User!
 }
+
 
 type User {
   id: ID!
-  name: String!
-  friends: [User!]!
+  name: String
+
 }
 
 type Query {
-  todos: [Todo!]!
+  users: [User!]!
 }
 
 input NewTodo {

@@ -54,5 +54,5 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
-#  User:
-#    model: lai.com/gqlgen_study/model.User
+  User:
+    model: lai.com/gqlgen_study/graph/model.User
