@@ -1,31 +1,27 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-#  user: User!
+type Chatroom {
+  name: String!
+  messages: [Message!]!
 }
 
-
-type User {
+type Message {
   id: ID!
-  name: String
-
+  text: String!
+  createdBy: String!
+  createdAt: Time!
 }
 
 type Query {
-  users: [User!]!
-}
-
-input NewTodo {
-  text: String!
-  userId: String!
+  room(name:String!): Chatroom
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  post(text: String!, username: String!, roomName: String!): Message!
 }
+
+type Subscription {
+  messageAdded(roomName: String!): Message!
+}
+
+scalar Time
+
+directive @user(username: String!) on SUBSCRIPTION
