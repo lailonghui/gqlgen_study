@@ -12,4 +12,3 @@ type Message struct {
 	CreatedBy string    `json:"createdBy"`
 	CreatedAt time.Time `json:"createdAt"`
 }
-  
