@@ -1,0 +1,213 @@
+scalar Time
+
+"照片类别枚举"
+enum PhotoCategory {
+  "自拍"
+  SELFIE
+  "肖像"
+  PORTRAIT
+  "活动"
+  ACTION
+  "风景画"
+  LANDSCAPE
+  "绘画的"
+  GRAPHIC
+}
+
+"排序字段枚举"
+enum SortDirection {
+  "递增"
+  ASCENDING
+  "递减"
+  DESCENDING
+}
+
+"照片可排序字段"
+enum SortablePhotoField {
+  name
+  description
+  category
+  created
+}
+
+
+
+type User {
+  githubLogin: ID!
+  name: String
+  avatar: String
+  postedPhotos(
+    filter: PhotoFilter
+    paging: DataPage
+    sorting: DataSort
+  ): [Photo!]!
+  inPhotos(
+    filter: PhotoFilter
+    paging: DataPage
+    sorting: DataSort
+  ): [Photo!]!
+  friends: [Friendship!]!
+}
+
+"友情信息"
+type Friendship {
+  friends: [User!]!
+  howLong: Int!
+  whereWeMet: Location
+}
+
+"位置信息"
+type Location {
+  name: String!
+  description: String
+}
+
+"照片"
+type Photo {
+  id: ID!
+  name: String!
+  url: String!
+  description: String
+  created: Time!
+  category: PhotoCategory!
+  postedBy: User!
+  taggedUsers(sorting:DataSort): [User!]!
+}
+
+
+
+
+#使用联合类型实现
+#union AgendaItem = StudyGroup | Workout
+#
+#"学习小组"
+#type StudyGroup {
+#  name: String!
+#  subject: String
+#  students: [User]
+#}
+#
+#"健身"
+#type Workout {
+#  name: String!
+#  "次数(repeat)"
+#  reps: Int!
+#}
+#
+
+
+#使用接口实现
+interface AgendaItem {
+  "议程名称"
+  name: String!
+  "开始时间"
+  start: Time!
+  "结束时间"
+  end: Time!
+}
+
+type StudyGroup implements AgendaItem{
+  name: String!
+  start: Time!
+  end: Time!
+  participants: [User!]!
+  topic: String!
+}
+
+type Workout implements AgendaItem {
+  "议程名称"
+  name: String!
+  "开始时间"
+  start: Time!
+  "结束时间"
+  end: Time!
+  reps: Int!
+
+}
+
+"授权码"
+type AuthPayload {
+  user: User!
+  token: String!
+}
+
+type Query {
+  "照片的总数量"
+  totalPhoto: Int!
+  "所有的照片数据"
+  allPhotos(
+    filter: PhotoFilter
+    paging: DataPage
+    sorting: DataSort
+  ): [Photo!]!
+  "根据id选出图片信息"
+  photo(id: ID!): Photo!
+
+  "用户的总数量"
+  totalUser: Int!
+  "所有的用户数据"
+  allUsers(
+    paging: DataPage
+    sorting: DataSort
+  ): [User]!
+  "根据id选出用户信息"
+  user(githubLogin: ID!): User!
+
+
+  "日常议程"
+  agenda: [AgendaItem!]!
+}
+
+input PostPhotoInput {
+  name: String!
+  description: String
+  category: PhotoCategory = PORTRAIT
+}
+
+"照片过滤输入"
+input PhotoFilter {
+  category: PhotoCategory
+  createBetween: DateRange
+  taggedUsers: [ID!]
+  searchText: String
+}
+
+"日期区间 "
+input DateRange {
+  start: Time!
+  end: Time
+}
+
+"数据页数"
+input DataPage {
+  "单个数据页中一次性返回的数据量"
+  num: Int = 10
+  "数据页码"
+  page: Int = 0
+}
+
+"数据排序"
+input DataSort {
+  sort: SortDirection = DESCENDING
+  sortBy: SortablePhotoField = created
+}
+
+type Mutation {
+  "上传照片"
+  postPhoto(input: PostPhotoInput!): Photo!
+  """
+    授权
+    信息
+  """
+  githubAuth(code: String): AuthPayload
+}
+
+
+type Subscription {
+  newPhoto(
+    category: PhotoCategory
+
+  ): Photo!
+  newUser: User!
+}
+
