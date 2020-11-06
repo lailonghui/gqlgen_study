@@ -1,6 +1,6 @@
 
 scalar Map
-
+scalar Upload
 
 "用户"
 type Query {
@@ -17,6 +17,10 @@ type Todo {
 type User {
   id: Int!
   name: String!
+}
+
+type Mutation {
+  singleUpload(file: Upload!): Boolean!
 }
 
 
