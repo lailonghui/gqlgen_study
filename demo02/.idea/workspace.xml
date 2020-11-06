@@ -1,18 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d3a3163b-7a54-4fb1-984d-59eb068fa880" name="Default Changelist" comment="first commit">
-      <change afterPath="$PROJECT_DIR$/graph/User.graphqls" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/graph/dataloader/dataloders.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/graph/model/todo.go" afterDir="false" />
+    <list default="true" id="d3a3163b-7a54-4fb1-984d-59eb068fa880" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gqlgen.yml" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/generated/generated.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/model/models_gen.go" beforeDir="false" afterPath="$PROJECT_DIR$/graph/model/models_gen.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/schema.graphqls" beforeDir="false" afterPath="$PROJECT_DIR$/graph/schema.graphqls" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/schema.resolvers.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -35,40 +25,13 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/graph/schema.graphqls">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="500">
-              <caret line="25" column="2" selection-start-line="25" selection-start-column="2" selection-end-line="25" selection-end-column="2" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/server.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="220">
-              <caret line="11" selection-start-line="11" selection-end-line="11" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/graph/dataloader/dataloders.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="229">
-              <caret line="40" selection-start-line="40" selection-end-line="40" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/graph/schema.resolvers.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="300">
-              <caret line="42" column="4" selection-start-line="42" selection-start-column="6" selection-end-line="48" selection-end-column="22" />
+            <state relative-caret-position="1160">
+              <caret line="58" column="30" selection-start-line="58" selection-start-column="30" selection-end-line="58" selection-end-column="30" />
               <folding>
-                <element signature="e#202#369#0" expanded="true" />
+                <element signature="e#14#258#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -117,9 +80,9 @@
         <option value="$PROJECT_DIR$/graph/User.graphqls" />
         <option value="$PROJECT_DIR$/graph/schema.graphqls" />
         <option value="$PROJECT_DIR$/graph/model/todo.go" />
-        <option value="$PROJECT_DIR$/server.go" />
         <option value="$PROJECT_DIR$/graph/schema.resolvers.go" />
         <option value="$PROJECT_DIR$/graph/dataloader/dataloders.go" />
+        <option value="$PROJECT_DIR$/server.go" />
       </list>
     </option>
   </component>
@@ -242,7 +205,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="first commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="first commit" />
+    <MESSAGE value="use dataLoader success" />
+    <option name="LAST_COMMIT_MESSAGE" value="use dataLoader success" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -293,20 +257,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/graph/resolver.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/graph/schema.graphqls">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="500">
-          <caret line="25" column="2" selection-start-line="25" selection-start-column="2" selection-end-line="25" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/graph/model/todo.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="220">
@@ -342,17 +292,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/server.go">
+    <entry file="file://$PROJECT_DIR$/graph/schema.graphqls">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="11" selection-start-line="11" selection-end-line="11" />
+        <state relative-caret-position="500">
+          <caret line="25" column="2" selection-start-line="25" selection-start-column="2" selection-end-line="25" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graph/resolver.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret selection-end-column="48" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/graph/schema.resolvers.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="300">
-          <caret line="42" column="4" selection-start-line="42" selection-start-column="6" selection-end-line="48" selection-end-column="22" />
+          <caret line="42" column="5" selection-start-line="42" selection-start-column="5" selection-end-line="48" selection-end-column="22" />
           <folding>
             <element signature="e#202#369#0" expanded="true" />
           </folding>
@@ -361,8 +318,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/graph/dataloader/dataloders.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="229">
-          <caret line="40" selection-start-line="40" selection-end-line="40" />
+        <state relative-caret-position="169">
+          <caret line="40" column="53" lean-forward="true" selection-start-line="40" selection-start-column="53" selection-end-line="40" selection-end-column="53" />
+          <folding>
+            <element signature="e#209#293#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1160">
+          <caret line="58" column="30" selection-start-line="58" selection-start-column="30" selection-end-line="58" selection-end-column="30" />
+          <folding>
+            <element signature="e#14#258#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
