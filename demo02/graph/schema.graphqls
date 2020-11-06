@@ -1,13 +1,31 @@
 
+scalar Map
+
+
 "用户"
-type User {
-  id: ID!
-  name: String
-  avatar: String
-
-}
-
-
 type Query {
-  users: [User!]!
+  todos: [Todo!]
 }
+
+type Todo {
+  id: ID!
+  todo: String!
+  userRaw: User
+  userLoader: User
+}
+
+type User {
+  id: Int!
+  name: String!
+}
+
+
+#type Query {
+#  todos: [Todo!]!
+#  updateUser(id: ID!, changes: Map!): User
+#}
+
+#type UserChanges {
+#  name: String
+#  email: String
+#}

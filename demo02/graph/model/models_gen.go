@@ -2,9 +2,7 @@
 
 package model
 
-// 用户
 type User struct {
-	ID     string  `json:"id"`
-	Name   *string `json:"name"`
-	Avatar *string `json:"avatar"`
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
