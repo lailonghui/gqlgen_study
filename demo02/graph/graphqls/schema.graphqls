@@ -1,6 +1,6 @@
 
 scalar Map
-scalar Upload
+#scalar Upload
 
 "用户"
 type Query {
@@ -20,7 +20,7 @@ type User {
 }
 
 type Mutation {
-  singleUpload(file: Upload!): Boolean!
+  users: [User!]!
 }
 
 
