@@ -8,6 +8,8 @@
       <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision/go.sum" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision/gqlgen.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision/gqlgen.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision/graph/dataloader/dataloders.go" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision/graph/dataloader/dataloders.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision/graph/dataloader/userloader_gen.go" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision/graph/dataloader/userloader_gen.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision/graph/generated/generated.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision/graph/graphqls/User.graphqls" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision/graph/graphqls/fileUpload.graphqls" beforeDir="false" />

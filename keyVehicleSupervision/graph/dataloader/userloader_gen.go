@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"lai.com/gqlgen_study/demo02/graph/model"
+	"lai.com/gqlgen_study/keyVehicleSupervision/graph/model"
 )
 
 // UserLoaderConfig captures the config to create a new UserLoader

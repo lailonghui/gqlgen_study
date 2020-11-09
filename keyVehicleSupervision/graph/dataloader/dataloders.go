@@ -10,7 +10,7 @@ package dataloader
 
 import (
 	"context"
-	"lai.com/gqlgen_study/demo02/graph/model"
+	"lai.com/gqlgen_study/keyVehicleSupervision/graph/model"
 	"net/http"
 	"time"
 )

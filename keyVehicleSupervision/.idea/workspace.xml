@@ -2,21 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d3a3163b-7a54-4fb1-984d-59eb068fa880" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/graph/graphqls/vehicle.graphqls" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../demo01/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../demo01/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gqlgen.yml" beforeDir="false" afterPath="$PROJECT_DIR$/gqlgen.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/generated/generated.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/graphqls/User.graphqls" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/graphqls/fileUpload.graphqls" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/graphqls/schema.graphqls" beforeDir="false" afterPath="$PROJECT_DIR$/graph/graphqls/schema.graphqls" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/model/models_gen.go" beforeDir="false" afterPath="$PROJECT_DIR$/graph/model/models_gen.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/resolvers/fileUpload.resolvers.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/resolvers/resolver.go" beforeDir="false" afterPath="$PROJECT_DIR$/graph/resolvers/resolver.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/resolvers/schema.resolvers.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graph/dataloader/dataloders.go" beforeDir="false" afterPath="$PROJECT_DIR$/graph/dataloader/dataloders.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graph/dataloader/userloader_gen.go" beforeDir="false" afterPath="$PROJECT_DIR$/graph/dataloader/userloader_gen.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -46,8 +34,38 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/graph/generated/generated.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="182">
+            <state relative-caret-position="720">
               <caret line="36" column="5" selection-start-line="36" selection-start-column="5" selection-end-line="36" selection-end-column="5" />
+              <folding>
+                <element signature="e#83#383#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/graph/dataloader/dataloders.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="240">
+              <caret line="12" column="47" selection-start-line="12" selection-start-column="47" selection-end-line="12" selection-end-column="47" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/graph/dataloader/userloader_gen.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="160">
+              <caret line="8" column="47" selection-start-line="8" selection-start-column="47" selection-end-line="8" selection-end-column="47" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gqlgen.yml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="312">
+              <caret line="37" column="47" selection-start-line="37" selection-start-column="26" selection-end-line="37" selection-end-column="47" />
             </state>
           </provider>
         </entry>
@@ -61,11 +79,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/graph/graphqls/vehicle.graphqls">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="501">
-              <caret line="147" column="5" selection-start-line="147" selection-start-column="5" selection-end-line="147" selection-end-column="5" />
+            <state relative-caret-position="395">
+              <caret line="163" column="12" selection-start-line="163" selection-start-column="12" selection-end-line="163" selection-end-column="12" />
             </state>
           </provider>
         </entry>
@@ -129,10 +147,8 @@
         <option value="$PROJECT_DIR$/graph/User.resolvers.go" />
         <option value="$PROJECT_DIR$/graph/model/User.go" />
         <option value="$PROJECT_DIR$/graph/dataloders.go" />
-        <option value="$PROJECT_DIR$/graph/dataloader/userloader_gen.go" />
         <option value="$PROJECT_DIR$/graph/User.graphqls" />
         <option value="$PROJECT_DIR$/graph/model/todo.go" />
-        <option value="$PROJECT_DIR$/graph/dataloader/dataloders.go" />
         <option value="$PROJECT_DIR$/graph/schema.graphqls" />
         <option value="$PROJECT_DIR$/graph/schema.resolvers.go" />
         <option value="$PROJECT_DIR$/graph/resolver.go" />
@@ -146,6 +162,8 @@
         <option value="$PROJECT_DIR$/server.go" />
         <option value="$PROJECT_DIR$/graph/graphqls/schema.graphqls" />
         <option value="$PROJECT_DIR$/graph/graphqls/vehicle.graphqls" />
+        <option value="$PROJECT_DIR$/graph/dataloader/dataloders.go" />
+        <option value="$PROJECT_DIR$/graph/dataloader/userloader_gen.go" />
       </list>
     </option>
   </component>
@@ -173,6 +191,12 @@
               <item name="keyVehicleSupervision" type="b2602c69:ProjectViewProjectNode" />
               <item name="keyVehicleSupervision" type="462c0819:PsiDirectoryNode" />
               <item name="graph" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="keyVehicleSupervision" type="b2602c69:ProjectViewProjectNode" />
+              <item name="keyVehicleSupervision" type="462c0819:PsiDirectoryNode" />
+              <item name="graph" type="462c0819:PsiDirectoryNode" />
+              <item name="dataloader" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="keyVehicleSupervision" type="b2602c69:ProjectViewProjectNode" />
@@ -274,7 +298,7 @@
       <window_info id="Favorites" order="2" sideWeight="0.50161815" side_tool="true" weight="0.25266525" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.329718" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.35357916" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.35357916" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.18655097" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -301,7 +325,8 @@
     <MESSAGE value="upload file unfinished" />
     <MESSAGE value="upload file complete" />
     <MESSAGE value="重点车辆监管平台" />
-    <option name="LAST_COMMIT_MESSAGE" value="重点车辆监管平台" />
+    <MESSAGE value="车辆信息修改" />
+    <option name="LAST_COMMIT_MESSAGE" value="车辆信息修改" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -367,23 +392,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/graph/dataloader/userloader_gen.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="20">
-          <caret line="4" selection-start-line="4" selection-end-line="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/graph/dataloader/dataloders.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="800">
-          <caret line="40" column="53" lean-forward="true" selection-start-line="40" selection-start-column="53" selection-end-line="40" selection-end-column="53" />
-          <folding>
-            <element signature="e#209#293#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/graph/resolvers/fileUpload.resolvers.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="400">
@@ -395,13 +403,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="49" selection-start-column="28" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gqlgen.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="312">
-          <caret line="37" column="47" selection-start-line="37" selection-start-column="47" selection-end-line="37" selection-end-column="47" />
         </state>
       </provider>
     </entry>
@@ -435,13 +436,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/graph/generated/generated.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="36" column="5" selection-start-line="36" selection-start-column="5" selection-end-line="36" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/graph/graphqls/schema.graphqls">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="241">
@@ -458,8 +452,39 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/graph/graphqls/vehicle.graphqls">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="501">
-          <caret line="147" column="5" selection-start-line="147" selection-start-column="5" selection-end-line="147" selection-end-column="5" />
+        <state relative-caret-position="395">
+          <caret line="163" column="12" selection-start-line="163" selection-start-column="12" selection-end-line="163" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graph/generated/generated.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="720">
+          <caret line="36" column="5" selection-start-line="36" selection-start-column="5" selection-end-line="36" selection-end-column="5" />
+          <folding>
+            <element signature="e#83#383#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gqlgen.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="312">
+          <caret line="37" column="47" selection-start-line="37" selection-start-column="26" selection-end-line="37" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graph/dataloader/dataloders.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="12" column="47" selection-start-line="12" selection-start-column="47" selection-end-line="12" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graph/dataloader/userloader_gen.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="160">
+          <caret line="8" column="47" selection-start-line="8" selection-start-column="47" selection-end-line="8" selection-end-column="47" />
         </state>
       </provider>
     </entry>
