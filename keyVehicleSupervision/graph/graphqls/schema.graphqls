@@ -1,35 +1,43 @@
 
-scalar Map
-#scalar Upload
-
-"用户"
-type Query {
-  todos: [Todo!]
+"时间相关信息接口"
+interface TimeModel {
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
 }
 
-type Todo {
-  id: ID!
-  todo: String!
-  userRaw: User
-  userLoader: User
+"排序字段枚举"
+enum SortType {
+    "按创建时间最段优先排序"
+    NEWEST
+    "按创建时间最长优先排序"
+    OLDEST
 }
 
-type User {
-  id: Int!
-  name: String!
+"日期区间 "
+input DateRange {
+    start: Time!
+    end: Time
 }
 
-type Mutation {
-  users: [User!]!
+"数据页数"
+input DataPage {
+    "单个数据页中一次性返回的数据量"
+    num: Int = 10
+    "数据页码"
+    page: Int = 0
+    sort: SortType = NEWEST
 }
 
 
-#type Query {
-#  todos: [Todo!]!
-#  updateUser(id: ID!, changes: Map!): User
-#}
-
-#type UserChanges {
-#  name: String
-#  email: String
-#}
+type Query {}
+type Mutation{}

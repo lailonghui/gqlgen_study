@@ -3,35 +3,13 @@
 package model
 
 import (
-	"github.com/99designs/gqlgen/graphql"
+	"time"
 )
 
-// The `File` type, represents the response of uploading a file.
-type File struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Content     string `json:"content"`
-	ContentType string `json:"contentType"`
-}
-
-type Todo struct {
-	ID         string `json:"id"`
-	Todo       string `json:"todo"`
-	UserRaw    *User  `json:"userRaw"`
-	UserLoader *User  `json:"userLoader"`
-}
-
-// The `UploadFile` type, represents the request for uploading a file with certain payload.
-type UploadFile struct {
-	ID int `json:"id"`
-	// 上传人
-	From string `json:"from"`
-	// 点赞数
-	LikeNum int            `json:"likeNum"`
-	File    graphql.Upload `json:"file"`
-}
-
-type User struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+// 车辆维保数据
+type VehicleMaintenance struct {
+	// 维保时间
+	MaintenanceDate *time.Time `json:"maintenance_date"`
+	// 维保公里数
+	MaintenanceKilometers *float64 `json:"maintenance_kilometers"`
 }

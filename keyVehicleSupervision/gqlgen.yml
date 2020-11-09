@@ -19,7 +19,6 @@ model:
 
 # Where should the resolver implementations go?
 resolver:
-#  filename: graph/resolvers/schema.resolvers.go
   layout: follow-schema
   dir: graph/resolvers
   package: resolvers
@@ -36,7 +35,7 @@ resolver:
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
-  - "lai.com/gqlgen_study/demo02/graph/model"
+  - "lai.com/gqlgen_study/keyVehicleSupervision/graph/model"
 
 # This section declares type mapping between the GraphQL and go type systems
 #
