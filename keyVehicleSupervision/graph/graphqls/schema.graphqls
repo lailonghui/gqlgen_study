@@ -1,4 +1,5 @@
-
+scalar Time
+scalar Upload
 "时间相关信息接口"
 interface TimeModel {
     "创建时间"
@@ -15,17 +16,19 @@ interface TimeModel {
     delete_by: String
 }
 
-"排序字段枚举"
-enum SortType {
-    "按创建时间最段优先排序"
-    NEWEST
-    "按创建时间最长优先排序"
-    OLDEST
+"排序方向枚举"
+enum SortDirection {
+    "升序"
+    ASCENDING
+    "降序"
+    DESCENDING
 }
 
 "日期区间 "
 input DateRange {
-    start: Time!
+    "开始时间"
+    start: Time
+    "结束时间"
     end: Time
 }
 
@@ -35,9 +38,27 @@ input DataPage {
     num: Int = 10
     "数据页码"
     page: Int = 0
-    sort: SortType = NEWEST
+}
+
+"经营范围的车辆或驾驶员数量"
+type BusinessScopeInfo {
+    "经营范围"
+    business_scope: String
+    "车辆数量"
+    number: Int
+}
+
+"所在县区管辖的车辆或驾驶员统计信息"
+type DistrictCount{
+    "所在县区名称"
+    district_name: String!
+    "所在县区的经营范围的车辆或驾驶员的数量信息"
+    business_scope_info_list:[BusinessScopeInfo!]!
 }
 
 
-type Query {}
-type Mutation{}
+
+#type Query {
+#    "测试"
+#    test: String!
+#}

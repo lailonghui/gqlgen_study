@@ -1,0 +1,322 @@
+"驾驶员信息"
+type DriverInfo implements TimeModel{
+    "驾驶员外部编码,由golang程序生成的xid，暴露到外部使用"
+    driver_id: String!
+    "所在企业id"
+    enterprise_id: String
+    "所在部门id"
+    department_id: String
+    "驾驶员身份验证信息"
+    driver_identity: DriverIdentity
+    "驾驶员姓名"
+    driver_name: String
+    "手机号码"
+    telephone: String
+    "性别"
+    sex: Int!
+    "档案编号(后6位)"
+    files_number: String
+    "联系地址"
+    contact_address: String
+    "邮寄地址"
+    mailing_address: String
+    "是否提交"
+    is_submit: Boolean
+    "提交内容"
+    submit_content: String
+    "提交时间"
+    submit_at: Time
+    "提交人"
+    submit_by: String
+    "是否手动录入"
+    is_manual_input: Boolean
+    "是否录入"
+    is_input: Boolean
+    "录入时间"
+    input_at: Time
+    "录入人"
+    input_by: String
+    "是否校验数据"
+    is_check_data: Boolean
+    "检验时间"
+    check_at: Time
+    "校验人"
+    check_by: String
+    "驾驶员信息同步内网反馈信息"
+    remark_in: String
+    "内网更新时间"
+    update_time_in: Time
+    "是否通过短信验证"
+    is_check_sms: Boolean
+    "是否黑名单"
+    is_black: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+    "是否删除"
+    is_delete: Boolean
+    "备注"
+    remarks: String
+
+}
+
+"驾驶员身份验证信息"
+type DriverIdentity implements TimeModel{
+    "由golang程序生成的xid，暴露到外部使用"
+    identity_id: String!
+    "身份证号码"
+    id_card_num: String
+    "身份证出生日期"
+    id_card_birthday: Time
+    "身份证签发机关"
+    id_card_sign_government: String
+    "身份证民族"
+    id_card_nation: String
+    "身份证有效起始日期"
+    id_card_start_date: Time
+    "身份证有效截止日期"
+    id_card_end_date: Time
+    "身份证正面照，云存储地址"
+    id_card_front_pic: String
+    "身份证背面照，云存储地址"
+    id_card_back_pic: String
+    "身份证住址"
+    id_card_address: String
+    "驾驶员手持身份证照片,云储存系统返回的路径"
+    driver_holding_id_photo: String
+    "驾驶员的正面照,云储存系统返回的路径"
+    driver_photo: String
+    "驾驶员签名,云储存系统返回的路径"
+    driver_signature: String
+    "从业资格证号码"
+    occupational_number: String
+    "从业资格证有效期至"
+    occupational_expire_date: Time
+    "从业资格证发证机构"
+    occupational_issuing_authority: String
+    "劳动合同,云储存系统返回的完整劳动合同的图片路径"
+    labor_contract: [String]
+    "驾驶员驾驶证,云储存系统返回的路径"
+    driver_license_pic: String
+    "驾驶证发证机关"
+    driver_license_issuing_authority: String
+    "年审日期（六合一）"
+    annual_review_date: Time
+    "换证日期（六合一）"
+    renewal_date: Time
+    "累计积分（六合一）"
+    accumulatived_points: Float
+    "清分日期（六合一）"
+    sorting_date: Time
+    "准驾车型（六合一）"
+    quasi_driving_models: Int
+    "驾驶证发证所在地的省份ID"
+    driver_license_province_id: String
+    "驾驶证发证所在地的城市ID"
+    driver_license_city_id: String
+    "驾驶证发证所在地的区域ID"
+    driver_license_district_id: String
+    "驾驶证状态"
+    driver_license_status: Int
+    "驾驶证初次领证日期"
+    driver_license_issue_date: Time
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+
+"车辆驾驶员绑定表"
+type VehicleDriverBinding implements TimeModel{
+    "由golang程序生成的xid，暴露到外部使用"
+    vehicle_driver_binding_id: String!
+    "驾驶员id"
+    driver_id: String
+    "车辆id"
+    vehicle_id: String
+    "备注"
+    remarks: String
+    "租赁合同,,云储存系统返回的完整租赁合同的图片路径"
+    lease_contract: [String]
+    "车牌号"
+    license_plate_number: String
+    "车牌颜色"
+    license_plate_color: Int
+    "号牌种类"
+    license_plate_type: Int
+    "驾驶员姓名"
+    driver_name: String
+    "是否绑定"
+    is_binding: Boolean
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+
+"驾驶员信息的输入"
+input NewDriverInfo {
+    "驾驶员姓名"
+    driver_name: String
+    "性别"
+    sex: Int
+    "驾驶员身份验证信息ID"
+    driver_identity_id: String
+    "身份证住址"
+    id_card_address: String
+    "所在企业"
+    enterprise_name: String
+    "所在部门"
+    department_name: String
+    "手机号码"
+    telephone: String
+    "短信验证码"
+    SMS_verification_code: String
+    "驾驶证发证所在地"
+    driver_license_address: String
+    "档案编号(后6位)"
+    file_number: String
+    "驾驶员身份证"
+    id_card_pic: [Upload]
+    "驾驶员驾驶证"
+    driver_license: [Upload]
+    "劳动合同"
+    labor_contract: [Upload]
+}
+
+"车辆驾驶员绑定信息的输入"
+input NewVehicleDriverBinding {
+    "车牌号"
+    license_plate_number: String
+    "驾驶员姓名"
+    driver_name: String
+}
+
+"驾驶员信息的输入过滤"
+input DriverInfoFilter {
+    "驾驶员姓名"
+    driver_name: String
+    "驾驶员身份验证信息ID"
+    driver_identity_id: String
+    "手机号码"
+    telephone: String
+    "企业名称"
+    enterprise_name: String
+    "所在县"
+    district: String
+}
+
+"车辆驾驶员绑定信息的输入过滤"
+input VehicleDriverBindingFilter {
+    "车牌号"
+    license_plate_number: String
+    "经营范围"
+    business_scope: Int
+    "绑定状态"
+    is_binding: Boolean
+    "企业名称"
+    enterprise_name: String
+    "所在县"
+    district: String
+}
+
+"车辆信息可排序字段"
+enum SortableDriverField {
+    "创建时间"
+    created
+    "驾驶员身份验证信息ID"
+    driver_identity_id
+}
+
+"驾驶员信息数据排序"
+input DriverDataSort {
+    "排序方向"
+    sort: SortDirection = DESCENDING
+    "排序字段"
+    sortBy: SortableDriverField = created
+}
+
+"车辆驾驶员绑定信息可排序字段"
+enum SortableBindingField {
+    "创建时间"
+    created
+    "驾驶员身份验证信息ID"
+    driver_identity_id
+    "驾驶员id"
+    driver_id
+    "车辆id"
+    vehicle_id
+}
+
+"驾驶员信息数据排序"
+input VehicleDriverBindingDataSort {
+    "排序方向"
+    sort: SortDirection = DESCENDING
+    "排序字段"
+    sortBy: SortableBindingField = created
+}
+extend type Query {
+    "查询县区管辖的经营范围的驾驶员数量"
+    getDistrictDriverList(
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [DistrictCount!]!
+    "查询驾驶员信息"
+    getDriverInfoList(
+        filter: DriverInfoFilter,
+        paging: DataPage
+        sorting: DriverDataSort
+    ): [DriverInfo!]!
+    "查询车辆与驾驶员绑定关系数据"
+    getVehicleDriverBinding(
+        filter: VehicleDriverBindingFilter,
+        paging: DataPage
+        sorting:VehicleDriverBindingDataSort
+    ): [VehicleDriverBinding!]!
+}
+
+extend type Mutation {
+    "创建驾驶员信息"
+    createDriverInfo(req:NewDriverInfo!): DriverInfo!
+    "修改驾驶员信息"
+    updateDriverInfo(req:NewDriverInfo!): DriverInfo!
+    "删除驾驶员信息"
+    deleteDriverInfo(id:Int!): DriverInfo!
+    "创建车辆与驾驶员绑定关系"
+    createVehicleDriverBinding(req:NewVehicleDriverBinding!): VehicleDriverBinding!
+    "编辑车辆与驾驶员绑定关系"
+    updateVehicleDriverBinding(req:NewVehicleDriverBinding!): VehicleDriverBinding!
+    "解绑车辆与驾驶员"
+    deleteVehicleDriverBinding(id: Int!): VehicleDriverBinding!
+}

@@ -8,7 +8,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"lai.com/gqlgen_study/keyVehicleSupervision/graph/dataloader"
 	"lai.com/gqlgen_study/keyVehicleSupervision/graph/generated"
 	"lai.com/gqlgen_study/keyVehicleSupervision/graph/resolvers"
 	"net/http"
@@ -49,7 +48,8 @@ func graphqlHandler() gin.HandlerFunc {
 	})
 	h.Use(extension.Introspection{})
 	return func(c *gin.Context) {
-		dataloader.Middleware(h).ServeHTTP(c.Writer, c.Request)
+		//dataloader.Middleware(h).ServeHTTP(c.Writer, c.Request)
+		h.ServeHTTP(c.Writer, c.Request)
 	}
 }
 
