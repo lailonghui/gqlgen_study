@@ -1,0 +1,21 @@
+
+type Person {
+  "姓名"
+  name: String
+  "年龄"
+  age: Int
+}
+
+type Student   {
+  "姓名"
+  name: String
+  "年龄"
+  age: Int
+  "班级"
+  class: String
+}
+
+type Query {
+  persons: [Person!]!
+  student(id:ID!): Student
+}
