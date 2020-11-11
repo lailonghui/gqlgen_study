@@ -3,36 +3,48 @@
 package model
 
 import (
-	"github.com/99designs/gqlgen/graphql"
+	"fmt"
+	"io"
+	"strconv"
 )
 
-// The `File` type, represents the response of uploading a file.
-type File struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Content     string `json:"content"`
-	ContentType string `json:"contentType"`
+type Role string
+
+const (
+	RoleAdmin Role = "ADMIN"
+	RoleUser  Role = "USER"
+)
+
+var AllRole = []Role{
+	RoleAdmin,
+	RoleUser,
 }
 
-type Todo struct {
-	ID         string  `json:"id"`
-	Todo       string  `json:"todo"`
-	UserRaw    *User   `json:"userRaw"`
-	UserLoader *User   `json:"userLoader"`
-	Test       []*Todo `json:"test"`
+func (e Role) IsValid() bool {
+	switch e {
+	case RoleAdmin, RoleUser:
+		return true
+	}
+	return false
 }
 
-// The `UploadFile` type, represents the request for uploading a file with certain payload.
-type UploadFile struct {
-	ID int `json:"id"`
-	// 上传人
-	From string `json:"from"`
-	// 点赞数
-	LikeNum int            `json:"likeNum"`
-	File    graphql.Upload `json:"file"`
+func (e Role) String() string {
+	return string(e)
 }
 
-type User struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+func (e *Role) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Role(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Role", str)
+	}
+	return nil
+}
+
+func (e Role) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -11,11 +10,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"io/ioutil"
-	"lai.com/gqlgen_study/demo02/graph/dataloader"
-	"lai.com/gqlgen_study/demo02/graph/generated"
-	"lai.com/gqlgen_study/demo02/graph/model"
-	"lai.com/gqlgen_study/demo02/graph/resolvers"
+	"lai.com/gqlgen_study/demo03/graph/generated"
+	"lai.com/gqlgen_study/demo03/graph/model"
+	"lai.com/gqlgen_study/demo03/graph/resolvers"
 	"net/http"
 	"time"
 )
@@ -30,86 +27,19 @@ func main() {
 	r.Run(":8080")
 }
 
-//设置解析结构体的函数
-func getResolver() *resolvers.Resolver {
-	resolver := &resolvers.Resolver{}
-
-	resolver.MutationResolver.SingleUpload = func(ctx context.Context, file graphql.Upload) (*model.File, error) {
-		content, err := ioutil.ReadAll(file.File)
-		if err != nil {
-			return nil, err
-		}
-		return &model.File{
-			ID:          1,
-			Name:        file.Filename,
-			Content:     string(content),
-			ContentType: file.ContentType,
-		}, nil
-	}
-	resolver.MutationResolver.SingleUploadWithPayload = func(ctx context.Context, req model.UploadFile) (*model.File, error) {
-		content, err := ioutil.ReadAll(req.File.File)
-		if err != nil {
-			return nil, err
-		}
-		return &model.File{
-			ID:          1,
-			Name:        req.File.Filename,
-			Content:     string(content),
-			ContentType: req.File.ContentType,
-		}, nil
-	}
-	resolver.MutationResolver.MultipleUpload = func(ctx context.Context, files []*graphql.Upload) ([]*model.File, error) {
-		if len(files) == 0 {
-			return nil, errors.New("empty list")
-		}
-		var resp []*model.File
-		for i := range files {
-			content, err := ioutil.ReadAll(files[i].File)
-			if err != nil {
-				return []*model.File{}, err
-			}
-			resp = append(resp, &model.File{
-				ID:          i + 1,
-				Name:        files[i].Filename,
-				Content:     string(content),
-				ContentType: files[i].ContentType,
-			})
-		}
-		return resp, nil
-	}
-	resolver.MutationResolver.MultipleUploadWithPayload = func(ctx context.Context, req []*model.UploadFile) ([]*model.File, error) {
-		if len(req) == 0 {
-			return nil, errors.New("empty list")
-		}
-		var resp []*model.File
-		for i := range req {
-			content, err := ioutil.ReadAll(req[i].File.File)
-			if err != nil {
-				return []*model.File{}, err
-			}
-			resp = append(resp, &model.File{
-				ID:          i + 1,
-				Name:        req[i].File.Filename,
-				Content:     string(content),
-				ContentType: req[i].File.ContentType,
-			})
-		}
-		return resp, nil
-	}
-	return resolver
-}
-
 // Defining the Graphql handler
 func graphqlHandler() gin.HandlerFunc {
 	//NewExecutableSchema and Config are in the generated.go file
 	//Resolver is in the resolver.go file
 	//使用NewDefaultServer自动开启自省功能
-	config := generated.Config{Resolvers: getResolver()}
-	countComplexity := func(childComplexity int) int {
-		return childComplexity
+	config := generated.Config{Resolvers: &resolvers.Resolver{}}
+
+	config.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role model.Role) (interface{}, error) {
+		// block calling the next resolver
+		return nil, fmt.Errorf("Access denied")
+		// or let it pass through
+		//return next(ctx)
 	}
-	config.Complexity.Query.Todos = countComplexity
-	config.Complexity.Todo.Test = countComplexity
 
 	h := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 	h.AddTransport(transport.POST{})
@@ -131,7 +61,8 @@ func graphqlHandler() gin.HandlerFunc {
 	})
 
 	//开启服务器的自省
-	//h.Use(extension.Introspection{})
+	h.AddTransport(transport.Options{})
+	h.Use(extension.Introspection{})
 
 	//禁用身份验证的自省
 	//h.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
@@ -140,9 +71,9 @@ func graphqlHandler() gin.HandlerFunc {
 	//})
 
 	//设置查询复杂度
-	h.Use(extension.FixedComplexityLimit(2))
+	//h.Use(extension.FixedComplexityLimit(5))
 	return func(c *gin.Context) {
-		dataloader.Middleware(h).ServeHTTP(c.Writer, c.Request)
+		h.ServeHTTP(c.Writer, c.Request)
 	}
 }
 

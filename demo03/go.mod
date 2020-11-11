@@ -1,4 +1,4 @@
-module lai.com/gqlgen_study/demo02
+module lai.com/gqlgen_study/demo03
 
 go 1.13
 

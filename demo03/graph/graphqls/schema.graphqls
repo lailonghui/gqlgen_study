@@ -1,36 +1,25 @@
 
-scalar Map
-#scalar Upload
-
-"用户"
-type Query {
-  todos: [Todo!]
+#scalar Person
+scalar YesNo
+type Car {
+  make: String!
+  model: String!
+  color: String!
+  odometerReading: Int!
+#  owner: Person
+  y : YesNo!
 }
 
-type Todo {
-  id: ID!
-  todo: String!
-  userRaw: User
-  userLoader: User
-  test: [Todo!]!
-}
-
-type User {
-  id: Int!
-  name: String!
+type Query{
+  car: Car! @hasRole(role:ADMIN)
 }
 
 type Mutation {
-  users: [User!]!
+  deleteUser(userID: ID!): Boolean @hasRole(role: ADMIN)
 }
+directive @hasRole(role: Role!) on FIELD_DEFINITION
 
-
-#type Query {
-#  todos: [Todo!]!
-#  updateUser(id: ID!, changes: Map!): User
-#}
-
-#type UserChanges {
-#  name: String
-#  email: String
-#}
+enum Role {
+  ADMIN
+  USER
+}
