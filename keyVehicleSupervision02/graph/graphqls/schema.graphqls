@@ -1,0 +1,64 @@
+scalar Time
+scalar Upload
+"时间相关信息接口"
+interface TimeModel {
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"排序方向枚举"
+enum SortDirection {
+    "升序"
+    ASCENDING
+    "降序"
+    DESCENDING
+}
+
+"日期区间 "
+input DateRange {
+    "开始时间"
+    start: Time
+    "结束时间"
+    end: Time
+}
+
+"数据页数"
+input DataPage {
+    "单个数据页中一次性返回的数据量"
+    num: Int = 10
+    "数据页码"
+    page: Int = 0
+}
+
+"经营范围的车辆或驾驶员数量"
+type BusinessScopeInfo {
+    "经营范围"
+    business_scope: String
+    "车辆数量"
+    number: Int
+}
+
+"所在县区管辖的车辆或驾驶员统计信息"
+type DistrictCount{
+    "所在县区名称"
+    district_name: String!
+    "所在县区的经营范围的车辆或驾驶员的数量信息"
+    business_scope_info_list:[BusinessScopeInfo!]!
+}
+
+
+
+#type Query {
+#    "测试"
+#    test: String!
+#}

@@ -1,0 +1,627 @@
+
+"车辆违章明细"
+type VehicleViolationDetails implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    violation_detail_id: String!
+    "违章车辆信息"
+    vehicle_info: VehicleInfo
+    "违章驾驶员信息"
+    driver_info: DriverInfo
+    "所在企业id"
+    enterprise_id: String
+    "违法描述数据"
+    illegal_data: VIO_CODEWFDM
+    "违法时间"
+    illegal_time: Time
+    "违法处理状态"
+    illegal_handling_status: Int
+    "违法地点"
+    illega_location: String
+    "标准值"
+    standard_value: String
+    "实测值"
+    measured_value: String
+    "发现机构"
+    discovery_agency: String
+    "违法照片"
+    illegal_photo: String
+    "是否通知驾驶员"
+    is_notice_driver: Boolean
+    "通知时间"
+    notice_time: Time
+    "决定书号"
+    decision_number: String
+    "缴款标记"
+    payment_mark: String
+    "当事人姓名"
+    party_name: String
+    "信息来源：1，强制，2，非现场，0，简易"
+    information_source: Int
+    "驾驶人处理的交通违法记录对应的机动车信息"
+    vehicle_information: String
+    "内网更新时间"
+    update_time_in: Time
+    "是否处理"
+    is_handle: Boolean
+    "处理人"
+    handle_by: String
+    "处理时间"
+    handle_at: Time
+    "是否发送短信"
+    is_send: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"车辆违规计分记录"
+type VehicleViolationScoringRecord implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    violation_scoring_id: String!
+    "扣分车辆id"
+    vehicle_id: String
+    "扣分明细数据"
+    violation_scoring_item: VehicleViolationScoringItems
+    "扣分分值"
+    demerit_points: Float
+    "备注"
+    remarks: String
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"车辆违规计分项表"
+type VehicleViolationScoringItems implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    violation_scoring_item_id: String!
+    "扣分事项描述"
+    deduction_item_description: String
+    "扣分事项类别"
+    deduction_category: Int
+    "扣分分值"
+    demerit_points: Float
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"短信提醒日志表"
+type SmsRemindLog implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    sms_log_id: String!
+    "违章驾驶员信息"
+    driver_info: DriverInfo
+    "手机号码"
+    cellphone_number: String
+    "短信内容"
+    sms_content: String
+    "是否发送"
+    is_send: Boolean
+    "短信提醒类型"
+    sms_type: Int
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"违法描述字典表"
+type VIO_CODEWFDM {
+    "违法行为"
+    WFXW: String
+    "违法描述"
+    WFMS: String
+    "违法计分数"
+    WFJFS: Float
+    "最小罚款金额"
+    FKJE_MIN: Float
+    "最大罚款金额"
+    FKJE_MAX: Float
+    "序号"
+    XH: String
+}
+
+"区域处理机关交通违法违规登记表"
+type RegionalViolationRegister implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    regional_violation_register_id: String!
+    "违法明细数据"
+    violation_detail: VehicleViolationDetails
+    "违章车辆信息"
+    vehicle_info: VehicleInfo
+    "违章驾驶员信息"
+    driver_info: DriverInfo
+    "违法描述数据"
+    illegal_data: VIO_CODEWFDM
+    "违法时间"
+    illegal_time: Time
+    "类型(1车辆2驾驶员)"
+    illegal_type: Int
+    "登记时间"
+    register_time: Time
+    "处理机关"
+    processing_agency: String
+    "操作员"
+    operator: String
+    "类型(false未登记true已登记)"
+    is_register: Boolean
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"违章争议记录表"
+type DisputeViolationRecord implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    dispute_violation_id: String!
+    "违法明细数据"
+    violation_detail: VehicleViolationDetails
+    "书面申请材料"
+    written_application_materials: String
+    "劳动合同或租赁合同"
+    labor_contract: String
+    "行车日志"
+    driving_log: String
+    "证人证言"
+    witness: String
+    "当事人陈述"
+    statement: String
+    "图像证据材料"
+    pic_evidence: String
+    "行为人驾驶证"
+    driver_license: String
+    "机动车行驶证"
+    driving_license: String
+    "行为人身份证"
+    id_card: String
+    "机动车所有人营业执照"
+    business_license: String
+    "机动车所有人组织机构代码证"
+    organization_code: String
+    "法定代表人身份证"
+    legal_person_id_number: String
+    "委托代理人身份证"
+    agent_id_number: String
+    "机动车管理人身份证"
+    vehicle_manager_id_card: String
+    "其他证据材料"
+    other_evidence: [String]
+    "审批状态"
+    approve_state: Int
+    "内网更新时间"
+    update_time_in: Time
+    "联系地址"
+    contact_address: String
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"违章争议审批日志表"
+type DisputeViolationRecordLog {
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    dispute_violation_log_id: String!
+    "违章争议记录表数据"
+    dispute_violation_data: DisputeViolationRecord
+    "审核人"
+    reviewer: String
+    "审核时间"
+    review_time: Time
+    "审核意见"
+    review_opinion: String
+    "审核结果"
+    review_result: String
+    "审核动作名称"
+    review_action_name: String
+    "审批人"
+    approver: String
+    "内网更新时间"
+    update_time_in: Time
+}
+
+"周期内违法数据"
+type CycleViolationData {
+    "扣分分值"
+    demerit_points: Float
+    "违法次数"
+    number_of_violation: Int
+    "罚款金额"
+    penalty: Float
+}
+
+"驾驶员近3个记分周期违法数据"
+type DriverThreeScoringCycleData{
+    "违章驾驶员信息"
+    driver_info: DriverInfo
+    "计分周期违法数据"
+    CycleViolationDataList: [CycleViolationData]
+}
+
+"车辆交通违法排名数据"
+type VehicleViolationRankData{
+    "车辆信息"
+    vehicle_info: VehicleInfo
+    "扣分信息"
+    deduction_info: CycleViolationData
+}
+
+"十大类违法种类数据"
+type TenTypeIllegalData{
+    type: String
+    number: Int
+}
+
+"县区的十大类违法种类数据"
+type DistrictTenTypeIllegalData{
+    "所在县区名称"
+    district_name: String
+    "十大类违法种类数据"
+    illegal_data: [TenTypeIllegalData]
+}
+"驾驶员酒驾毒驾违法统计数据"
+type DriverDrinkAndDrugData{
+    "违章驾驶员信息"
+    driver_info: DriverInfo
+    "十大类违法种类数据"
+    illegal_data: [TenTypeIllegalData]
+}
+
+"四大类重点车辆交通违法处理数据"
+type FourTypeKeyVehicleViolation {
+    "违法车辆总数"
+    total: Int
+    "已处理车辆数"
+    handle_number: Int
+    "未处理车辆数"
+    unhandled_number: Int
+    "违法处理率"
+    Illegal_handle_rate: Float
+}
+
+"四大类重点车辆交通违法清零数据"
+type FourTypeKeyVehicleViolationClear {
+    "所在县区名称"
+    district_name: String
+    handle_data: [FourTypeKeyVehicleViolation]
+}
+
+"企业百车违法率数据"
+type IllegalRateOfVehicle{
+    "企业名称"
+    enterprise_name: String
+    "所在县"
+    district_name: String
+    "企业地址"
+    enterprise_address: String
+    "总车辆数"
+    total_number_of_vehicle: Int
+    "违法车辆数"
+    number_of_illegal_vehicle: Int
+    "总违法数"
+    total_number_of_violations: Int
+    "已处理车辆数"
+    handle_number: Int
+    "未处理车辆数"
+    unhandled_number: Int
+    "违法处理率"
+    Illegal_handle_rate: Float
+}
+"单车违法数统计"
+type SingleCarIllegalStatistics{
+    "驾驶员信息"
+    driver_info: DriverInfo
+    "企业名称"
+    enterprise_name: String
+    "所在县"
+    district_name: String
+    "企业地址"
+    enterprise_address: String
+    "总车辆数"
+    total_number_of_vehicle: Int
+    "违法车辆数"
+    number_of_illegal_vehicle: Int
+    "总违法数"
+    total_number_of_violations: Int
+    "已处理车辆数"
+    handle_number: Int
+    "未处理车辆数"
+    unhandled_number: Int
+    "违法处理率"
+    Illegal_handle_rate: Float
+}
+
+"辖区内交通违法车辆数量的输入过滤"
+input DistrictVehicleViolationListFilter {
+    "违法类型"
+     illegal_type:String
+    "违法时间从"
+    illegalBetween: DateRange
+}
+
+"车辆违章明细记录的输入过滤"
+input VehicleViolationDetailListFilter {
+    "车牌号"
+    license_plate_number: String
+    "是否处理"
+    is_handle:Boolean
+    "违法代码"
+    illegal_code: String
+    "违法时间从"
+    illegalBetween: DateRange
+    "违法类型"
+    illegal_type:String
+    "处理状态"
+    handle_type: String
+    "经营范围"
+    business_scope: Int
+    "企业名称"
+    enterprise_name: String
+    "处理时间从"
+    handle_Between: DateRange
+}
+
+"辖区内车辆交通违法处置率统计的输入过滤"
+input DistrictVehicleViolationHandleListFilter {
+    "经营范围"
+    business_scope: Int
+    "违法时间从"
+    illegalBetween: DateRange
+}
+
+"驾驶员交通违法数据的输入过滤"
+input DriverViolationListFilter {
+    "驾驶员姓名"
+    driver_name: String
+    "企业名称"
+    enterprise_name: String
+    "违法代码"
+    illegal_code: String
+    "违法时间从"
+    illegalBetween: DateRange
+    "处理状态"
+    handle_type: String
+}
+
+"驾驶员近3个记分周期违法数据的输入过滤"
+input DriverThreeScoringCycleDataFilter {
+    "驾驶员姓名"
+    driver_name: String
+    "驾驶员身份验证信息ID"
+    driver_identity_id: String
+    "企业名称"
+    enterprise_name: String
+}
+
+"车辆交通违法排名数据的输入过滤"
+input VehicleViolationRankDataFilter {
+    "车牌号"
+    license_plate_number: String
+    "违法时间从"
+    registerBetween: DateRange
+    "企业名称"
+    enterprise_name: String
+}
+
+"十大类违法种类数据的输入过滤"
+input DistrictTenTypeIllegalDataFilter {
+    "经营范围"
+    business_scope: Int
+    "违法时间从"
+    illegalBetween: DateRange
+
+}
+"驾驶员酒驾毒驾违法统计数据的输入过滤"
+input DriverDrinkAndDrugDataFilter {
+    "车辆类型"
+    vehicle_type: Int
+    "违法时间从"
+    illegalBetween: DateRange
+}
+"四大类重点车辆交通违法清零数据的输入过滤"
+input FourTypeKeyVehicleViolationClearFilter {
+    "违法时间从"
+    illegalBetween: DateRange
+}
+"企业百车违法率数据的输入过滤"
+input IllegalRateOfVehicleFilter {
+    "违法时间从"
+    illegalBetween: DateRange
+    "企业性质"
+    enterprise_nature: String
+    "车辆类型"
+    vehicle_type: Int
+    "车辆总数大于"
+    VehicleNumberGreaterThan:Int
+    "违法未处理数大于"
+    IllegalNumberGreaterThan:Int
+    "所在县"
+    district: String
+}
+"单车违法数统计的输入过滤"
+input SingleCarIllegalStatisticsFilter {
+    "违法时间从"
+    illegalBetween: DateRange
+    "车牌号"
+    license_plate_number: String
+    "车辆类型"
+    vehicle_type: Int
+    "企业名称"
+    enterprise_name: String
+    "车辆总数大于"
+    VehicleNumberGreaterThan:Int
+    "违法未处理数大于"
+    IllegalNumberGreaterThan:Int
+}
+
+"监管短信日志查询的输入过滤"
+input SmsRemindLogFilter {
+    "登记时间时间从"
+    registerBetween: DateRange
+    "手机号码"
+    telephone: String
+    "车辆类型"
+    vehicle_type: Int
+    "短信内容"
+    text_content: String
+    "所在县"
+    district: String
+    "企业名称"
+    enterprise_name: String
+    "驾驶员姓名"
+    driver_name: String
+    "车牌号"
+    license_plate_number: String
+}
+
+extend type Query {
+    "获取辖区内交通违法车辆数量"
+    getDistrictVehicleViolationList(
+        filter: DistrictVehicleViolationListFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [DistrictCount!]!
+    "获取车辆违章明细记录"
+    getVehicleViolationDetailList(
+        filter: VehicleViolationDetailListFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [VehicleViolationDetails!]!
+    "获取辖区内车辆交通违法处置率统计"
+    getDistrictVehicleViolationHandleList(
+        filter: DistrictVehicleViolationHandleListFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [DistrictCount!]!
+    "获取驾驶员交通违法数据"
+    getDriverViolationList(
+        filter: DriverViolationListFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [VehicleViolationDetails!]!
+    "获取驾驶员近3个记分周期违法数据"
+    getDriverThreeScoringCycleData(
+        filter: DriverThreeScoringCycleDataFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [DriverThreeScoringCycleData!]!
+    "获取车辆交通违法排名数据"
+    getVehicleViolationRankData(
+        filter: VehicleViolationRankDataFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [VehicleViolationRankData!]!
+    "获取十大类违法种类数据"
+    getDistrictTenTypeIllegalData(
+        filter: DistrictTenTypeIllegalDataFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [DistrictTenTypeIllegalData!]!
+    "获取驾驶员酒驾毒驾违法统计数据"
+    getDriverDrinkAndDrugData(
+        filter: DriverDrinkAndDrugDataFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [DriverDrinkAndDrugData!]!
+    "获取四大类重点车辆交通违法清零数据"
+    getFourTypeKeyVehicleViolationClear(
+        filter: FourTypeKeyVehicleViolationClearFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [FourTypeKeyVehicleViolationClear!]!
+    "获取企业百车违法率数据"
+    getIllegalRateOfVehicle(
+        filter: IllegalRateOfVehicleFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [IllegalRateOfVehicle!]!
+    "获取单车违法数统计"
+    getSingleCarIllegalStatistics(
+        filter: SingleCarIllegalStatisticsFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [SingleCarIllegalStatistics!]!
+    "查询监管短信日志"
+    getSmsRemindLog(
+        filter: SmsRemindLogFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [SmsRemindLog!]!
+}
