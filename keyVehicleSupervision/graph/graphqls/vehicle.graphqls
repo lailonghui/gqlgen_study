@@ -163,7 +163,7 @@ input VehicleDataSort {
 }
 
 "车辆信息的输入"
-input NewVehicleInfo {
+input NewVehicleInfo  {
     "车牌号"
     license_plate_number: String
     "车牌颜色"
