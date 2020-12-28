@@ -24,6 +24,16 @@ type BusinessScopeInfo struct {
 	Number *int `json:"number"`
 }
 
+// 周期内违法数据
+type CycleViolationData struct {
+	// 扣分分值
+	DemeritPoints *float64 `json:"demerit_points"`
+	// 违法次数
+	NumberOfViolation *int `json:"number_of_violation"`
+	// 罚款金额
+	Penalty *float64 `json:"penalty"`
+}
+
 // 数据页数
 type DataPage struct {
 	// 单个数据页中一次性返回的数据量
@@ -40,6 +50,92 @@ type DateRange struct {
 	End *time.Time `json:"end"`
 }
 
+// 违章争议记录表
+type DisputeViolationRecord struct {
+	// 主键id
+	ID string `json:"id"`
+	// 外部编码,由golang程序生成的xid，暴露到外部使用
+	DisputeViolationID string `json:"dispute_violation_id"`
+	// 违法明细数据
+	ViolationDetail *VehicleViolationDetails `json:"violation_detail"`
+	// 书面申请材料
+	WrittenApplicationMaterials *string `json:"written_application_materials"`
+	// 劳动合同或租赁合同
+	LaborContract *string `json:"labor_contract"`
+	// 行车日志
+	DrivingLog *string `json:"driving_log"`
+	// 证人证言
+	Witness *string `json:"witness"`
+	// 当事人陈述
+	Statement *string `json:"statement"`
+	// 图像证据材料
+	PicEvidence *string `json:"pic_evidence"`
+	// 行为人驾驶证
+	DriverLicense *string `json:"driver_license"`
+	// 机动车行驶证
+	DrivingLicense *string `json:"driving_license"`
+	// 行为人身份证
+	IDCard *string `json:"id_card"`
+	// 机动车所有人营业执照
+	BusinessLicense *string `json:"business_license"`
+	// 机动车所有人组织机构代码证
+	OrganizationCode *string `json:"organization_code"`
+	// 法定代表人身份证
+	LegalPersonIDNumber *string `json:"legal_person_id_number"`
+	// 委托代理人身份证
+	AgentIDNumber *string `json:"agent_id_number"`
+	// 机动车管理人身份证
+	VehicleManagerIDCard *string `json:"vehicle_manager_id_card"`
+	// 其他证据材料
+	OtherEvidence []*string `json:"other_evidence"`
+	// 审批状态
+	ApproveState *int `json:"approve_state"`
+	// 内网更新时间
+	UpdateTimeIn *time.Time `json:"update_time_in"`
+	// 联系地址
+	ContactAddress *string `json:"contact_address"`
+	// 是否删除
+	IsDelete *bool `json:"is_delete"`
+	// 创建时间
+	CreateAt time.Time `json:"create_at"`
+	// 创建人
+	CreateBy string `json:"create_by"`
+	// 修改时间
+	UpdateAt time.Time `json:"update_at"`
+	// 修改人
+	UpdateBy string `json:"update_by"`
+	// 删除时间
+	DeleteAt *time.Time `json:"delete_at"`
+	// 删除人
+	DeleteBy *string `json:"delete_by"`
+}
+
+func (DisputeViolationRecord) IsTimeModel() {}
+
+// 违章争议审批日志表
+type DisputeViolationRecordLog struct {
+	// 主键id
+	ID string `json:"id"`
+	// 外部编码,由golang程序生成的xid，暴露到外部使用
+	DisputeViolationLogID string `json:"dispute_violation_log_id"`
+	// 违章争议记录表数据
+	DisputeViolationData *DisputeViolationRecord `json:"dispute_violation_data"`
+	// 审核人
+	Reviewer *string `json:"reviewer"`
+	// 审核时间
+	ReviewTime *time.Time `json:"review_time"`
+	// 审核意见
+	ReviewOpinion *string `json:"review_opinion"`
+	// 审核结果
+	ReviewResult *string `json:"review_result"`
+	// 审核动作名称
+	ReviewActionName *string `json:"review_action_name"`
+	// 审批人
+	Approver *string `json:"approver"`
+	// 内网更新时间
+	UpdateTimeIn *time.Time `json:"update_time_in"`
+}
+
 // 所在县区管辖的车辆或驾驶员统计信息
 type DistrictCount struct {
 	// 所在县区名称
@@ -48,12 +144,60 @@ type DistrictCount struct {
 	BusinessScopeInfoList []*BusinessScopeInfo `json:"business_scope_info_list"`
 }
 
+// 县区的十大类违法种类数据
+type DistrictTenTypeIllegalData struct {
+	// 所在县区名称
+	DistrictName *string `json:"district_name"`
+	// 十大类违法种类数据
+	IllegalData []*TenTypeIllegalData `json:"illegal_data"`
+}
+
+// 十大类违法种类数据的输入过滤
+type DistrictTenTypeIllegalDataFilter struct {
+	// 经营范围
+	BusinessScope *int `json:"business_scope"`
+	// 违法时间从
+	IllegalBetween *DateRange `json:"illegalBetween"`
+}
+
+// 辖区内车辆交通违法处置率统计的输入过滤
+type DistrictVehicleViolationHandleListFilter struct {
+	// 经营范围
+	BusinessScope *int `json:"business_scope"`
+	// 违法时间从
+	IllegalBetween *DateRange `json:"illegalBetween"`
+}
+
+// 辖区内交通违法车辆数量的输入过滤
+type DistrictVehicleViolationListFilter struct {
+	// 违法类型
+	IllegalType *string `json:"illegal_type"`
+	// 违法时间从
+	IllegalBetween *DateRange `json:"illegalBetween"`
+}
+
 // 驾驶员信息数据排序
 type DriverDataSort struct {
 	// 排序方向
 	Sort *SortDirection `json:"sort"`
 	// 排序字段
 	SortBy *SortableDriverField `json:"sortBy"`
+}
+
+// 驾驶员酒驾毒驾违法统计数据
+type DriverDrinkAndDrugData struct {
+	// 违章驾驶员信息
+	DriverInfo *DriverInfo `json:"driver_info"`
+	// 十大类违法种类数据
+	IllegalData []*TenTypeIllegalData `json:"illegal_data"`
+}
+
+// 驾驶员酒驾毒驾违法统计数据的输入过滤
+type DriverDrinkAndDrugDataFilter struct {
+	// 车辆类型
+	VehicleType *int `json:"vehicle_type"`
+	// 违法时间从
+	IllegalBetween *DateRange `json:"illegalBetween"`
 }
 
 // 驾驶员身份验证信息
@@ -220,28 +364,123 @@ type DriverInfoFilter struct {
 	District *string `json:"district"`
 }
 
+// 驾驶员近3个记分周期违法数据
+type DriverThreeScoringCycleData struct {
+	// 违章驾驶员信息
+	DriverInfo *DriverInfo `json:"driver_info"`
+	// 计分周期违法数据
+	CycleViolationDataList []*CycleViolationData `json:"CycleViolationDataList"`
+}
+
+// 驾驶员近3个记分周期违法数据的输入过滤
+type DriverThreeScoringCycleDataFilter struct {
+	// 驾驶员姓名
+	DriverName *string `json:"driver_name"`
+	// 驾驶员身份验证信息ID
+	DriverIdentityID *string `json:"driver_identity_id"`
+	// 企业名称
+	EnterpriseName *string `json:"enterprise_name"`
+}
+
+// 驾驶员交通违法数据的输入过滤
+type DriverViolationListFilter struct {
+	// 驾驶员姓名
+	DriverName *string `json:"driver_name"`
+	// 企业名称
+	EnterpriseName *string `json:"enterprise_name"`
+	// 违法代码
+	IllegalCode *string `json:"illegal_code"`
+	// 违法时间从
+	IllegalBetween *DateRange `json:"illegalBetween"`
+	// 处理状态
+	HandleType *string `json:"handle_type"`
+}
+
+// 四大类重点车辆交通违法处理数据
+type FourTypeKeyVehicleViolation struct {
+	// 违法车辆总数
+	Total *int `json:"total"`
+	// 已处理车辆数
+	HandleNumber *int `json:"handle_number"`
+	// 未处理车辆数
+	UnhandledNumber *int `json:"unhandled_number"`
+	// 违法处理率
+	IllegalHandleRate *float64 `json:"Illegal_handle_rate"`
+}
+
+// 四大类重点车辆交通违法清零数据
+type FourTypeKeyVehicleViolationClear struct {
+	// 所在县区名称
+	DistrictName *string                        `json:"district_name"`
+	HandleData   []*FourTypeKeyVehicleViolation `json:"handle_data"`
+}
+
+// 四大类重点车辆交通违法清零数据的输入过滤
+type FourTypeKeyVehicleViolationClearFilter struct {
+	// 违法时间从
+	IllegalBetween *DateRange `json:"illegalBetween"`
+}
+
+// 企业百车违法率数据
+type IllegalRateOfVehicle struct {
+	// 企业名称
+	EnterpriseName *string `json:"enterprise_name"`
+	// 所在县
+	DistrictName *string `json:"district_name"`
+	// 企业地址
+	EnterpriseAddress *string `json:"enterprise_address"`
+	// 总车辆数
+	TotalNumberOfVehicle *int `json:"total_number_of_vehicle"`
+	// 违法车辆数
+	NumberOfIllegalVehicle *int `json:"number_of_illegal_vehicle"`
+	// 总违法数
+	TotalNumberOfViolations *int `json:"total_number_of_violations"`
+	// 已处理车辆数
+	HandleNumber *int `json:"handle_number"`
+	// 未处理车辆数
+	UnhandledNumber *int `json:"unhandled_number"`
+	// 违法处理率
+	IllegalHandleRate *float64 `json:"Illegal_handle_rate"`
+}
+
+// 企业百车违法率数据的输入过滤
+type IllegalRateOfVehicleFilter struct {
+	// 违法时间从
+	IllegalBetween *DateRange `json:"illegalBetween"`
+	// 企业性质
+	EnterpriseNature *string `json:"enterprise_nature"`
+	// 车辆类型
+	VehicleType *int `json:"vehicle_type"`
+	// 车辆总数大于
+	VehicleNumberGreaterThan *int `json:"VehicleNumberGreaterThan"`
+	// 违法未处理数大于
+	IllegalNumberGreaterThan *int `json:"IllegalNumberGreaterThan"`
+	// 所在县
+	District *string `json:"district"`
+}
+
 // 驾驶员信息的输入
 type NewDriverInfo struct {
 	// 驾驶员姓名
-	DriverName string `json:"driver_name"`
+	DriverName *string `json:"driver_name"`
 	// 性别
-	Sex int `json:"sex"`
+	Sex *int `json:"sex"`
 	// 驾驶员身份验证信息ID
-	DriverIdentityID string `json:"driver_identity_id"`
+	DriverIdentityID *string `json:"driver_identity_id"`
 	// 身份证住址
-	IDCardAddress string `json:"id_card_address"`
+	IDCardAddress *string `json:"id_card_address"`
 	// 所在企业
-	EnterpriseName string `json:"enterprise_name"`
+	EnterpriseName *string `json:"enterprise_name"`
 	// 所在部门
-	DepartmentName string `json:"department_name"`
+	DepartmentName *string `json:"department_name"`
 	// 手机号码
 	Telephone *string `json:"telephone"`
 	// 短信验证码
-	SmsVerificationCode string `json:"SMS_verification_code"`
+	SmsVerificationCode *string `json:"SMS_verification_code"`
 	// 驾驶证发证所在地
-	DriverLicenseAddress string `json:"driver_license_address"`
+	DriverLicenseAddress *string `json:"driver_license_address"`
 	// 档案编号(后6位)
-	FileNumber string `json:"file_number"`
+	FileNumber *string `json:"file_number"`
 	// 驾驶员身份证
 	IDCardPic []*graphql.Upload `json:"id_card_pic"`
 	// 驾驶员驾驶证
@@ -284,6 +523,210 @@ type NewVehicleInfo struct {
 	RetirementDate *time.Time `json:"retirement_date"`
 	// 使用性质（六合一）
 	UseNature *string `json:"use_nature"`
+}
+
+// 经纬度
+type Point struct {
+	// 经度
+	Longitude float64 `json:"longitude"`
+	// 纬度
+	Latitude float64 `json:"latitude"`
+}
+
+// 区域处理机关交通违法违规登记表
+type RegionalViolationRegister struct {
+	// 主键id
+	ID string `json:"id"`
+	// 外部编码,由golang程序生成的xid，暴露到外部使用
+	RegionalViolationRegisterID string `json:"regional_violation_register_id"`
+	// 违法明细数据
+	ViolationDetail *VehicleViolationDetails `json:"violation_detail"`
+	// 违章车辆信息
+	VehicleInfo *VehicleInfo `json:"vehicle_info"`
+	// 违章驾驶员信息
+	DriverInfo *DriverInfo `json:"driver_info"`
+	// 违法描述数据
+	IllegalData *VioCodewfdm `json:"illegal_data"`
+	// 违法时间
+	IllegalTime *time.Time `json:"illegal_time"`
+	// 类型(1车辆2驾驶员)
+	IllegalType *int `json:"illegal_type"`
+	// 登记时间
+	RegisterTime *time.Time `json:"register_time"`
+	// 处理机关
+	ProcessingAgency *string `json:"processing_agency"`
+	// 操作员
+	Operator *string `json:"operator"`
+	// 类型(false未登记true已登记)
+	IsRegister *bool `json:"is_register"`
+	// 是否删除
+	IsDelete *bool `json:"is_delete"`
+	// 创建时间
+	CreateAt time.Time `json:"create_at"`
+	// 创建人
+	CreateBy string `json:"create_by"`
+	// 修改时间
+	UpdateAt time.Time `json:"update_at"`
+	// 修改人
+	UpdateBy string `json:"update_by"`
+	// 删除时间
+	DeleteAt *time.Time `json:"delete_at"`
+	// 删除人
+	DeleteBy *string `json:"delete_by"`
+}
+
+func (RegionalViolationRegister) IsTimeModel() {}
+
+// 单车违法数统计
+type SingleCarIllegalStatistics struct {
+	// 驾驶员信息
+	DriverInfo *DriverInfo `json:"driver_info"`
+	// 企业名称
+	EnterpriseName *string `json:"enterprise_name"`
+	// 所在县
+	DistrictName *string `json:"district_name"`
+	// 企业地址
+	EnterpriseAddress *string `json:"enterprise_address"`
+	// 总车辆数
+	TotalNumberOfVehicle *int `json:"total_number_of_vehicle"`
+	// 违法车辆数
+	NumberOfIllegalVehicle *int `json:"number_of_illegal_vehicle"`
+	// 总违法数
+	TotalNumberOfViolations *int `json:"total_number_of_violations"`
+	// 已处理车辆数
+	HandleNumber *int `json:"handle_number"`
+	// 未处理车辆数
+	UnhandledNumber *int `json:"unhandled_number"`
+	// 违法处理率
+	IllegalHandleRate *float64 `json:"Illegal_handle_rate"`
+}
+
+// 单车违法数统计的输入过滤
+type SingleCarIllegalStatisticsFilter struct {
+	// 违法时间从
+	IllegalBetween *DateRange `json:"illegalBetween"`
+	// 车牌号
+	LicensePlateNumber *string `json:"license_plate_number"`
+	// 车辆类型
+	VehicleType *int `json:"vehicle_type"`
+	// 企业名称
+	EnterpriseName *string `json:"enterprise_name"`
+	// 车辆总数大于
+	VehicleNumberGreaterThan *int `json:"VehicleNumberGreaterThan"`
+	// 违法未处理数大于
+	IllegalNumberGreaterThan *int `json:"IllegalNumberGreaterThan"`
+}
+
+// 短信提醒日志表
+type SmsRemindLog struct {
+	// 主键id
+	ID string `json:"id"`
+	// 外部编码,由golang程序生成的xid，暴露到外部使用
+	SmsLogID string `json:"sms_log_id"`
+	// 违章驾驶员信息
+	DriverInfo *DriverInfo `json:"driver_info"`
+	// 手机号码
+	CellphoneNumber *string `json:"cellphone_number"`
+	// 短信内容
+	SmsContent *string `json:"sms_content"`
+	// 是否发送
+	IsSend *bool `json:"is_send"`
+	// 短信提醒类型
+	SmsType *int `json:"sms_type"`
+	// 是否删除
+	IsDelete *bool `json:"is_delete"`
+	// 创建时间
+	CreateAt time.Time `json:"create_at"`
+	// 创建人
+	CreateBy string `json:"create_by"`
+	// 修改时间
+	UpdateAt time.Time `json:"update_at"`
+	// 修改人
+	UpdateBy string `json:"update_by"`
+	// 删除时间
+	DeleteAt *time.Time `json:"delete_at"`
+	// 删除人
+	DeleteBy *string `json:"delete_by"`
+}
+
+func (SmsRemindLog) IsTimeModel() {}
+
+// 监管短信日志查询的输入过滤
+type SmsRemindLogFilter struct {
+	// 登记时间时间从
+	RegisterBetween *DateRange `json:"registerBetween"`
+	// 手机号码
+	Telephone *string `json:"telephone"`
+	// 车辆类型
+	VehicleType *int `json:"vehicle_type"`
+	// 短信内容
+	TextContent *string `json:"text_content"`
+	// 所在县
+	District *string `json:"district"`
+	// 企业名称
+	EnterpriseName *string `json:"enterprise_name"`
+	// 驾驶员姓名
+	DriverName *string `json:"driver_name"`
+	// 车牌号
+	LicensePlateNumber *string `json:"license_plate_number"`
+}
+
+// 十大类违法种类数据
+type TenTypeIllegalData struct {
+	Type   *string `json:"type"`
+	Number *int    `json:"number"`
+}
+
+// 违法描述字典表
+type VioCodewfdm struct {
+	// 违法行为
+	Wfxw *string `json:"WFXW"`
+	// 违法描述
+	Wfms *string `json:"WFMS"`
+	// 违法计分数
+	Wfjfs *float64 `json:"WFJFS"`
+	// 最小罚款金额
+	FkjeMin *float64 `json:"FKJE_MIN"`
+	// 最大罚款金额
+	FkjeMax *float64 `json:"FKJE_MAX"`
+	// 序号
+	Xh *string `json:"XH"`
+}
+
+// 车辆报警信息
+type VehicleAlarmData struct {
+	// 由golang程序生成的xid，暴露到外部使用
+	AlarmDataID string `json:"alarm_data_id"`
+	// 车辆ID
+	VehicleID string `json:"vehicle_id"`
+	// 所属区域ID
+	Pid string `json:"pid"`
+	// 车辆速度
+	Speed float64 `json:"speed"`
+	// 记录时间
+	RecordTime time.Time `json:"record_time"`
+	// 位置描述
+	PosDesc string `json:"pos_desc"`
+	// 空间数据类型point表示经纬度
+	Coordinate *Point `json:"coordinate"`
+	// 行车记录仪速度
+	DrivingSpeed float64 `json:"driving_speed"`
+	// 处理状态(1.处理中 2.处理完毕 3.不作处理 4.将来处理)
+	DealingStatus int `json:"dealing_status"`
+	// 处理人
+	UserID string `json:"user_id"`
+	// 处理描述
+	DealDesc string `json:"deal_desc"`
+	// 报警类型(001.超速报警 002.疲劳驾驶报警 066.凌晨2点到5点行驶报警)
+	AlarmType int `json:"alarm_type"`
+	// 报警开始时间
+	AlarmBeginTime time.Time `json:"alarm_begin_time"`
+	// 报警结束时间
+	AlarmEndTime time.Time `json:"alarm_end_time"`
+	// 车牌号
+	LicensePlateNumber string `json:"license_plate_number"`
+	// 车牌颜色
+	LicensePlateColor int `json:"license_plate_color"`
 }
 
 // 车辆信息数据排序
@@ -333,6 +776,14 @@ type VehicleDriverBinding struct {
 }
 
 func (VehicleDriverBinding) IsTimeModel() {}
+
+// 驾驶员信息数据排序
+type VehicleDriverBindingDataSort struct {
+	// 排序方向
+	Sort *SortDirection `json:"sort"`
+	// 排序字段
+	SortBy *SortableBindingField `json:"sortBy"`
+}
 
 // 车辆驾驶员绑定信息的输入过滤
 type VehicleDriverBindingFilter struct {
@@ -492,6 +943,281 @@ type VehicleMaintenance struct {
 	MaintenanceKilometers *float64 `json:"maintenance_kilometers"`
 }
 
+// 车辆监控图片
+type VehicleSupervisionPhoto struct {
+	// 由golang程序生成的xid，暴露到外部使用
+	SupervisionPhotoID string `json:"supervision_photo_id"`
+	// 车辆ID
+	VehicleID string `json:"vehicle_id"`
+	// 驾驶员id
+	DriverID string `json:"driver_id"`
+	// 所在企业id
+	EnterpriseID string `json:"enterprise_id"`
+	// 终端上报时间
+	UpdateTime time.Time `json:"update_time"`
+	// 监控图片地址
+	MonitoringPic string `json:"monitoring_pic"`
+	// 监控图片上传时间
+	MonitoringPicUploadTime time.Time `json:"monitoring_pic_upload_time"`
+	// 终端IMEI
+	Imei string `json:"IMEI"`
+	// SIM卡号
+	SimNumber string `json:"SIM_number"`
+}
+
+// 车辆终端达标情况
+type VehicleTerminalStatus struct {
+	// 主键id
+	ID string `json:"id"`
+	// ACC状态
+	Acc string `json:"acc"`
+	// 制动信号(刹车)
+	Brake string `json:"brake"`
+	// 左转向灯信号
+	LeftLamp string `json:"left_lamp"`
+	// 右转向灯信号
+	RightLamp string `json:"right_lamp"`
+	// 近光灯信号
+	NearLamp string `json:"near_lamp"`
+	// 远光灯信号(大灯)
+	FarLamp string `json:"far_lamp"`
+	// 喇叭信号
+	LoudSpeaker string `json:"loud_speaker"`
+	// 定位状态
+	Locate string `json:"locate"`
+	// 前门
+	FrontDoor string `json:"front_door"`
+	// GPS信号
+	GpsOpen string `json:"GPS_open"`
+	// 北斗信号
+	BdOpen string `json:"BD_open"`
+	// 摄像头
+	Camera string `json:"camera"`
+	// 车速
+	DrivingSpeed string `json:"driving_speed"`
+	// 备注
+	Remarks string `json:"remarks"`
+	// 记录时间
+	RecordTime time.Time `json:"record_time"`
+}
+
+// 车辆违章明细记录的输入过滤
+type VehicleViolationDetailListFilter struct {
+	// 车牌号
+	LicensePlateNumber *string `json:"license_plate_number"`
+	// 是否处理
+	IsHandle *bool `json:"is_handle"`
+	// 违法代码
+	IllegalCode *string `json:"illegal_code"`
+	// 违法时间从
+	IllegalBetween *DateRange `json:"illegalBetween"`
+	// 违法类型
+	IllegalType *string `json:"illegal_type"`
+	// 处理状态
+	HandleType *string `json:"handle_type"`
+	// 经营范围
+	BusinessScope *int `json:"business_scope"`
+	// 企业名称
+	EnterpriseName *string `json:"enterprise_name"`
+	// 处理时间从
+	HandleBetween *DateRange `json:"handle_Between"`
+}
+
+// 车辆违章明细
+type VehicleViolationDetails struct {
+	// 主键id
+	ID string `json:"id"`
+	// 外部编码,由golang程序生成的xid，暴露到外部使用
+	ViolationDetailID string `json:"violation_detail_id"`
+	// 违章车辆信息
+	VehicleInfo *VehicleInfo `json:"vehicle_info"`
+	// 违章驾驶员信息
+	DriverInfo *DriverInfo `json:"driver_info"`
+	// 所在企业id
+	EnterpriseID *string `json:"enterprise_id"`
+	// 违法描述数据
+	IllegalData *VioCodewfdm `json:"illegal_data"`
+	// 违法时间
+	IllegalTime *time.Time `json:"illegal_time"`
+	// 违法处理状态
+	IllegalHandlingStatus *int `json:"illegal_handling_status"`
+	// 违法地点
+	IllegaLocation *string `json:"illega_location"`
+	// 标准值
+	StandardValue *string `json:"standard_value"`
+	// 实测值
+	MeasuredValue *string `json:"measured_value"`
+	// 发现机构
+	DiscoveryAgency *string `json:"discovery_agency"`
+	// 违法照片
+	IllegalPhoto *string `json:"illegal_photo"`
+	// 是否通知驾驶员
+	IsNoticeDriver *bool `json:"is_notice_driver"`
+	// 通知时间
+	NoticeTime *time.Time `json:"notice_time"`
+	// 决定书号
+	DecisionNumber *string `json:"decision_number"`
+	// 缴款标记
+	PaymentMark *string `json:"payment_mark"`
+	// 当事人姓名
+	PartyName *string `json:"party_name"`
+	// 信息来源：1，强制，2，非现场，0，简易
+	InformationSource *int `json:"information_source"`
+	// 驾驶人处理的交通违法记录对应的机动车信息
+	VehicleInformation *string `json:"vehicle_information"`
+	// 内网更新时间
+	UpdateTimeIn *time.Time `json:"update_time_in"`
+	// 是否处理
+	IsHandle *bool `json:"is_handle"`
+	// 处理人
+	HandleBy *string `json:"handle_by"`
+	// 处理时间
+	HandleAt *time.Time `json:"handle_at"`
+	// 是否发送短信
+	IsSend *bool `json:"is_send"`
+	// 创建时间
+	CreateAt time.Time `json:"create_at"`
+	// 创建人
+	CreateBy string `json:"create_by"`
+	// 修改时间
+	UpdateAt time.Time `json:"update_at"`
+	// 修改人
+	UpdateBy string `json:"update_by"`
+	// 删除时间
+	DeleteAt *time.Time `json:"delete_at"`
+	// 删除人
+	DeleteBy *string `json:"delete_by"`
+}
+
+func (VehicleViolationDetails) IsTimeModel() {}
+
+// 车辆交通违法排名数据
+type VehicleViolationRankData struct {
+	// 车辆信息
+	VehicleInfo *VehicleInfo `json:"vehicle_info"`
+	// 扣分信息
+	DeductionInfo *CycleViolationData `json:"deduction_info"`
+}
+
+// 车辆交通违法排名数据的输入过滤
+type VehicleViolationRankDataFilter struct {
+	// 车牌号
+	LicensePlateNumber *string `json:"license_plate_number"`
+	// 违法时间从
+	RegisterBetween *DateRange `json:"registerBetween"`
+	// 企业名称
+	EnterpriseName *string `json:"enterprise_name"`
+}
+
+// 车辆违规计分项表
+type VehicleViolationScoringItems struct {
+	// 主键id
+	ID string `json:"id"`
+	// 外部编码,由golang程序生成的xid，暴露到外部使用
+	ViolationScoringItemID string `json:"violation_scoring_item_id"`
+	// 扣分事项描述
+	DeductionItemDescription *string `json:"deduction_item_description"`
+	// 扣分事项类别
+	DeductionCategory *int `json:"deduction_category"`
+	// 扣分分值
+	DemeritPoints *float64 `json:"demerit_points"`
+	// 是否删除
+	IsDelete *bool `json:"is_delete"`
+	// 创建时间
+	CreateAt time.Time `json:"create_at"`
+	// 创建人
+	CreateBy string `json:"create_by"`
+	// 修改时间
+	UpdateAt time.Time `json:"update_at"`
+	// 修改人
+	UpdateBy string `json:"update_by"`
+	// 删除时间
+	DeleteAt *time.Time `json:"delete_at"`
+	// 删除人
+	DeleteBy *string `json:"delete_by"`
+}
+
+func (VehicleViolationScoringItems) IsTimeModel() {}
+
+// 车辆违规计分记录
+type VehicleViolationScoringRecord struct {
+	// 主键id
+	ID string `json:"id"`
+	// 外部编码,由golang程序生成的xid，暴露到外部使用
+	ViolationScoringID string `json:"violation_scoring_id"`
+	// 扣分车辆id
+	VehicleID *string `json:"vehicle_id"`
+	// 扣分明细数据
+	ViolationScoringItem *VehicleViolationScoringItems `json:"violation_scoring_item"`
+	// 扣分分值
+	DemeritPoints *float64 `json:"demerit_points"`
+	// 备注
+	Remarks *string `json:"remarks"`
+	// 是否删除
+	IsDelete *bool `json:"is_delete"`
+	// 创建时间
+	CreateAt time.Time `json:"create_at"`
+	// 创建人
+	CreateBy string `json:"create_by"`
+	// 修改时间
+	UpdateAt time.Time `json:"update_at"`
+	// 修改人
+	UpdateBy string `json:"update_by"`
+	// 删除时间
+	DeleteAt *time.Time `json:"delete_at"`
+	// 删除人
+	DeleteBy *string `json:"delete_by"`
+}
+
+func (VehicleViolationScoringRecord) IsTimeModel() {}
+
+// 照片类别枚举
+type AlarmType string
+
+const (
+	// 超速报警
+	AlarmTypeSpeeding AlarmType = "SPEEDING"
+	// 疲劳驾驶报警
+	AlarmTypeFatigueDriving AlarmType = "FATIGUE_DRIVING"
+	// 凌晨2点到5点行驶报警
+	AlarmTypeTwoAmToFiveAm AlarmType = "TWO_AM_TO_FIVE_AM"
+)
+
+var AllAlarmType = []AlarmType{
+	AlarmTypeSpeeding,
+	AlarmTypeFatigueDriving,
+	AlarmTypeTwoAmToFiveAm,
+}
+
+func (e AlarmType) IsValid() bool {
+	switch e {
+	case AlarmTypeSpeeding, AlarmTypeFatigueDriving, AlarmTypeTwoAmToFiveAm:
+		return true
+	}
+	return false
+}
+
+func (e AlarmType) String() string {
+	return string(e)
+}
+
+func (e *AlarmType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AlarmType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AlarmType", str)
+	}
+	return nil
+}
+
+func (e AlarmType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // 排序方向枚举
 type SortDirection string
 
@@ -533,6 +1259,56 @@ func (e *SortDirection) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SortDirection) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// 车辆驾驶员绑定信息可排序字段
+type SortableBindingField string
+
+const (
+	// 创建时间
+	SortableBindingFieldCreated SortableBindingField = "created"
+	// 驾驶员身份验证信息ID
+	SortableBindingFieldDriverIdentityID SortableBindingField = "driver_identity_id"
+	// 驾驶员id
+	SortableBindingFieldDriverID SortableBindingField = "driver_id"
+	// 车辆id
+	SortableBindingFieldVehicleID SortableBindingField = "vehicle_id"
+)
+
+var AllSortableBindingField = []SortableBindingField{
+	SortableBindingFieldCreated,
+	SortableBindingFieldDriverIdentityID,
+	SortableBindingFieldDriverID,
+	SortableBindingFieldVehicleID,
+}
+
+func (e SortableBindingField) IsValid() bool {
+	switch e {
+	case SortableBindingFieldCreated, SortableBindingFieldDriverIdentityID, SortableBindingFieldDriverID, SortableBindingFieldVehicleID:
+		return true
+	}
+	return false
+}
+
+func (e SortableBindingField) String() string {
+	return string(e)
+}
+
+func (e *SortableBindingField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortableBindingField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SortableBindingField", str)
+	}
+	return nil
+}
+
+func (e SortableBindingField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

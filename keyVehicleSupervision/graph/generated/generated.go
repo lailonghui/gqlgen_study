@@ -7,6 +7,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"keyVehicleSupervision/graph/model"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -16,7 +18,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
-	"lai.com/gqlgen_study/keyVehicleSupervision/graph/model"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -39,6 +40,7 @@ type Config struct {
 type ResolverRoot interface {
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
@@ -50,9 +52,69 @@ type ComplexityRoot struct {
 		Number        func(childComplexity int) int
 	}
 
+	CycleViolationData struct {
+		DemeritPoints     func(childComplexity int) int
+		NumberOfViolation func(childComplexity int) int
+		Penalty           func(childComplexity int) int
+	}
+
+	DisputeViolationRecord struct {
+		AgentIDNumber               func(childComplexity int) int
+		ApproveState                func(childComplexity int) int
+		BusinessLicense             func(childComplexity int) int
+		ContactAddress              func(childComplexity int) int
+		CreateAt                    func(childComplexity int) int
+		CreateBy                    func(childComplexity int) int
+		DeleteAt                    func(childComplexity int) int
+		DeleteBy                    func(childComplexity int) int
+		DisputeViolationID          func(childComplexity int) int
+		DriverLicense               func(childComplexity int) int
+		DrivingLicense              func(childComplexity int) int
+		DrivingLog                  func(childComplexity int) int
+		ID                          func(childComplexity int) int
+		IDCard                      func(childComplexity int) int
+		IsDelete                    func(childComplexity int) int
+		LaborContract               func(childComplexity int) int
+		LegalPersonIDNumber         func(childComplexity int) int
+		OrganizationCode            func(childComplexity int) int
+		OtherEvidence               func(childComplexity int) int
+		PicEvidence                 func(childComplexity int) int
+		Statement                   func(childComplexity int) int
+		UpdateAt                    func(childComplexity int) int
+		UpdateBy                    func(childComplexity int) int
+		UpdateTimeIn                func(childComplexity int) int
+		VehicleManagerIDCard        func(childComplexity int) int
+		ViolationDetail             func(childComplexity int) int
+		Witness                     func(childComplexity int) int
+		WrittenApplicationMaterials func(childComplexity int) int
+	}
+
+	DisputeViolationRecordLog struct {
+		Approver              func(childComplexity int) int
+		DisputeViolationData  func(childComplexity int) int
+		DisputeViolationLogID func(childComplexity int) int
+		ID                    func(childComplexity int) int
+		ReviewActionName      func(childComplexity int) int
+		ReviewOpinion         func(childComplexity int) int
+		ReviewResult          func(childComplexity int) int
+		ReviewTime            func(childComplexity int) int
+		Reviewer              func(childComplexity int) int
+		UpdateTimeIn          func(childComplexity int) int
+	}
+
 	DistrictCount struct {
 		BusinessScopeInfoList func(childComplexity int) int
 		DistrictName          func(childComplexity int) int
+	}
+
+	DistrictTenTypeIllegalData struct {
+		DistrictName func(childComplexity int) int
+		IllegalData  func(childComplexity int) int
+	}
+
+	DriverDrinkAndDrugData struct {
+		DriverInfo  func(childComplexity int) int
+		IllegalData func(childComplexity int) int
 	}
 
 	DriverIdentity struct {
@@ -130,24 +192,160 @@ type ComplexityRoot struct {
 		UpdateTimeIn   func(childComplexity int) int
 	}
 
+	DriverThreeScoringCycleData struct {
+		CycleViolationDataList func(childComplexity int) int
+		DriverInfo             func(childComplexity int) int
+	}
+
+	FourTypeKeyVehicleViolation struct {
+		HandleNumber      func(childComplexity int) int
+		IllegalHandleRate func(childComplexity int) int
+		Total             func(childComplexity int) int
+		UnhandledNumber   func(childComplexity int) int
+	}
+
+	FourTypeKeyVehicleViolationClear struct {
+		DistrictName func(childComplexity int) int
+		HandleData   func(childComplexity int) int
+	}
+
+	IllegalRateOfVehicle struct {
+		DistrictName            func(childComplexity int) int
+		EnterpriseAddress       func(childComplexity int) int
+		EnterpriseName          func(childComplexity int) int
+		HandleNumber            func(childComplexity int) int
+		IllegalHandleRate       func(childComplexity int) int
+		NumberOfIllegalVehicle  func(childComplexity int) int
+		TotalNumberOfVehicle    func(childComplexity int) int
+		TotalNumberOfViolations func(childComplexity int) int
+		UnhandledNumber         func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateDriverInfo           func(childComplexity int, req model.NewDriverInfo) int
 		CreateVehicleDriverBinding func(childComplexity int, req model.NewVehicleDriverBinding) int
 		CreateVehicleInfo          func(childComplexity int, req model.NewVehicleInfo) int
-		DeleteDriverInfo           func(childComplexity int, req model.NewDriverInfo) int
-		DeleteVehicleDriverBinding func(childComplexity int, req model.NewVehicleDriverBinding) int
-		DeleteVehicleInfo          func(childComplexity int, req model.NewVehicleInfo) int
+		DeleteDriverInfo           func(childComplexity int, id int) int
+		DeleteVehicleDriverBinding func(childComplexity int, id int) int
+		DeleteVehicleInfo          func(childComplexity int, id int) int
 		UpdateDriverInfo           func(childComplexity int, req model.NewDriverInfo) int
 		UpdateVehicleDriverBinding func(childComplexity int, req model.NewVehicleDriverBinding) int
 		UpdateVehicleInfo          func(childComplexity int, req model.NewVehicleInfo) int
 	}
 
+	Point struct {
+		Latitude  func(childComplexity int) int
+		Longitude func(childComplexity int) int
+	}
+
 	Query struct {
-		GetDistrictDriverList   func(childComplexity int, paging *model.DataPage, sorting *model.SortDirection) int
-		GetDistrictVehicleList  func(childComplexity int, paging *model.DataPage, sorting *model.SortDirection) int
-		GetDriverInfoList       func(childComplexity int, filter *model.DriverInfoFilter, paging *model.DataPage, sorting *model.DriverDataSort) int
-		GetVehicleDriverBinding func(childComplexity int, filter *model.DriverInfoFilter, paging *model.DataPage, sorting *model.DriverDataSort) int
-		GetVehicleInfoList      func(childComplexity int, filter *model.VehicleInfoFilter, paging *model.DataPage, sorting *model.VehicleDataSort) int
+		GetDistrictDriverList                 func(childComplexity int, paging *model.DataPage, sorting *model.SortDirection) int
+		GetDistrictTenTypeIllegalData         func(childComplexity int, filter *model.DistrictTenTypeIllegalDataFilter, paging *model.DataPage, sorting *model.SortDirection) int
+		GetDistrictVehicleList                func(childComplexity int, paging *model.DataPage, sorting *model.SortDirection) int
+		GetDistrictVehicleViolationHandleList func(childComplexity int, filter *model.DistrictVehicleViolationHandleListFilter, paging *model.DataPage, sorting *model.SortDirection) int
+		GetDistrictVehicleViolationList       func(childComplexity int, filter *model.DistrictVehicleViolationListFilter, paging *model.DataPage, sorting *model.SortDirection) int
+		GetDriverDrinkAndDrugData             func(childComplexity int, filter *model.DriverDrinkAndDrugDataFilter, paging *model.DataPage, sorting *model.SortDirection) int
+		GetDriverInfoList                     func(childComplexity int, filter *model.DriverInfoFilter, paging *model.DataPage, sorting *model.DriverDataSort) int
+		GetDriverThreeScoringCycleData        func(childComplexity int, filter *model.DriverThreeScoringCycleDataFilter, paging *model.DataPage, sorting *model.SortDirection) int
+		GetDriverViolationList                func(childComplexity int, filter *model.DriverViolationListFilter, paging *model.DataPage, sorting *model.SortDirection) int
+		GetFourTypeKeyVehicleViolationClear   func(childComplexity int, filter *model.FourTypeKeyVehicleViolationClearFilter, paging *model.DataPage, sorting *model.SortDirection) int
+		GetIllegalRateOfVehicle               func(childComplexity int, filter *model.IllegalRateOfVehicleFilter, paging *model.DataPage, sorting *model.SortDirection) int
+		GetSingleCarIllegalStatistics         func(childComplexity int, filter *model.SingleCarIllegalStatisticsFilter, paging *model.DataPage, sorting *model.SortDirection) int
+		GetSmsRemindLog                       func(childComplexity int, filter *model.SmsRemindLogFilter, paging *model.DataPage, sorting *model.SortDirection) int
+		GetVehicleAlarmDataList               func(childComplexity int, paging *model.DataPage, sorting *model.SortDirection) int
+		GetVehicleDriverBinding               func(childComplexity int, filter *model.VehicleDriverBindingFilter, paging *model.DataPage, sorting *model.VehicleDriverBindingDataSort) int
+		GetVehicleInfoList                    func(childComplexity int, filter *model.VehicleInfoFilter, paging *model.DataPage, sorting *model.VehicleDataSort) int
+		GetVehicleViolationDetailList         func(childComplexity int, filter *model.VehicleViolationDetailListFilter, paging *model.DataPage, sorting *model.SortDirection) int
+		GetVehicleViolationRankData           func(childComplexity int, filter *model.VehicleViolationRankDataFilter, paging *model.DataPage, sorting *model.SortDirection) int
+	}
+
+	RegionalViolationRegister struct {
+		CreateAt                    func(childComplexity int) int
+		CreateBy                    func(childComplexity int) int
+		DeleteAt                    func(childComplexity int) int
+		DeleteBy                    func(childComplexity int) int
+		DriverInfo                  func(childComplexity int) int
+		ID                          func(childComplexity int) int
+		IllegalData                 func(childComplexity int) int
+		IllegalTime                 func(childComplexity int) int
+		IllegalType                 func(childComplexity int) int
+		IsDelete                    func(childComplexity int) int
+		IsRegister                  func(childComplexity int) int
+		Operator                    func(childComplexity int) int
+		ProcessingAgency            func(childComplexity int) int
+		RegionalViolationRegisterID func(childComplexity int) int
+		RegisterTime                func(childComplexity int) int
+		UpdateAt                    func(childComplexity int) int
+		UpdateBy                    func(childComplexity int) int
+		VehicleInfo                 func(childComplexity int) int
+		ViolationDetail             func(childComplexity int) int
+	}
+
+	SingleCarIllegalStatistics struct {
+		DistrictName            func(childComplexity int) int
+		DriverInfo              func(childComplexity int) int
+		EnterpriseAddress       func(childComplexity int) int
+		EnterpriseName          func(childComplexity int) int
+		HandleNumber            func(childComplexity int) int
+		IllegalHandleRate       func(childComplexity int) int
+		NumberOfIllegalVehicle  func(childComplexity int) int
+		TotalNumberOfVehicle    func(childComplexity int) int
+		TotalNumberOfViolations func(childComplexity int) int
+		UnhandledNumber         func(childComplexity int) int
+	}
+
+	SmsRemindLog struct {
+		CellphoneNumber func(childComplexity int) int
+		CreateAt        func(childComplexity int) int
+		CreateBy        func(childComplexity int) int
+		DeleteAt        func(childComplexity int) int
+		DeleteBy        func(childComplexity int) int
+		DriverInfo      func(childComplexity int) int
+		ID              func(childComplexity int) int
+		IsDelete        func(childComplexity int) int
+		IsSend          func(childComplexity int) int
+		SmsContent      func(childComplexity int) int
+		SmsLogID        func(childComplexity int) int
+		SmsType         func(childComplexity int) int
+		UpdateAt        func(childComplexity int) int
+		UpdateBy        func(childComplexity int) int
+	}
+
+	Subscription struct {
+		NewVehicleAlarmData func(childComplexity int, typeArg *model.AlarmType) int
+	}
+
+	TenTypeIllegalData struct {
+		Number func(childComplexity int) int
+		Type   func(childComplexity int) int
+	}
+
+	VioCodewfdm struct {
+		FkjeMax func(childComplexity int) int
+		FkjeMin func(childComplexity int) int
+		Wfjfs   func(childComplexity int) int
+		Wfms    func(childComplexity int) int
+		Wfxw    func(childComplexity int) int
+		Xh      func(childComplexity int) int
+	}
+
+	VehicleAlarmData struct {
+		AlarmBeginTime     func(childComplexity int) int
+		AlarmDataID        func(childComplexity int) int
+		AlarmEndTime       func(childComplexity int) int
+		AlarmType          func(childComplexity int) int
+		Coordinate         func(childComplexity int) int
+		DealDesc           func(childComplexity int) int
+		DealingStatus      func(childComplexity int) int
+		DrivingSpeed       func(childComplexity int) int
+		LicensePlateColor  func(childComplexity int) int
+		LicensePlateNumber func(childComplexity int) int
+		Pid                func(childComplexity int) int
+		PosDesc            func(childComplexity int) int
+		RecordTime         func(childComplexity int) int
+		Speed              func(childComplexity int) int
+		UserID             func(childComplexity int) int
+		VehicleID          func(childComplexity int) int
 	}
 
 	VehicleDriverBinding struct {
@@ -231,25 +429,142 @@ type ComplexityRoot struct {
 		MaintenanceDate       func(childComplexity int) int
 		MaintenanceKilometers func(childComplexity int) int
 	}
+
+	VehicleSupervisionPhoto struct {
+		DriverID                func(childComplexity int) int
+		EnterpriseID            func(childComplexity int) int
+		Imei                    func(childComplexity int) int
+		MonitoringPic           func(childComplexity int) int
+		MonitoringPicUploadTime func(childComplexity int) int
+		SimNumber               func(childComplexity int) int
+		SupervisionPhotoID      func(childComplexity int) int
+		UpdateTime              func(childComplexity int) int
+		VehicleID               func(childComplexity int) int
+	}
+
+	VehicleTerminalStatus struct {
+		Acc          func(childComplexity int) int
+		BdOpen       func(childComplexity int) int
+		Brake        func(childComplexity int) int
+		Camera       func(childComplexity int) int
+		DrivingSpeed func(childComplexity int) int
+		FarLamp      func(childComplexity int) int
+		FrontDoor    func(childComplexity int) int
+		GpsOpen      func(childComplexity int) int
+		ID           func(childComplexity int) int
+		LeftLamp     func(childComplexity int) int
+		Locate       func(childComplexity int) int
+		LoudSpeaker  func(childComplexity int) int
+		NearLamp     func(childComplexity int) int
+		RecordTime   func(childComplexity int) int
+		Remarks      func(childComplexity int) int
+		RightLamp    func(childComplexity int) int
+	}
+
+	VehicleViolationDetails struct {
+		CreateAt              func(childComplexity int) int
+		CreateBy              func(childComplexity int) int
+		DecisionNumber        func(childComplexity int) int
+		DeleteAt              func(childComplexity int) int
+		DeleteBy              func(childComplexity int) int
+		DiscoveryAgency       func(childComplexity int) int
+		DriverInfo            func(childComplexity int) int
+		EnterpriseID          func(childComplexity int) int
+		HandleAt              func(childComplexity int) int
+		HandleBy              func(childComplexity int) int
+		ID                    func(childComplexity int) int
+		IllegaLocation        func(childComplexity int) int
+		IllegalData           func(childComplexity int) int
+		IllegalHandlingStatus func(childComplexity int) int
+		IllegalPhoto          func(childComplexity int) int
+		IllegalTime           func(childComplexity int) int
+		InformationSource     func(childComplexity int) int
+		IsHandle              func(childComplexity int) int
+		IsNoticeDriver        func(childComplexity int) int
+		IsSend                func(childComplexity int) int
+		MeasuredValue         func(childComplexity int) int
+		NoticeTime            func(childComplexity int) int
+		PartyName             func(childComplexity int) int
+		PaymentMark           func(childComplexity int) int
+		StandardValue         func(childComplexity int) int
+		UpdateAt              func(childComplexity int) int
+		UpdateBy              func(childComplexity int) int
+		UpdateTimeIn          func(childComplexity int) int
+		VehicleInfo           func(childComplexity int) int
+		VehicleInformation    func(childComplexity int) int
+		ViolationDetailID     func(childComplexity int) int
+	}
+
+	VehicleViolationRankData struct {
+		DeductionInfo func(childComplexity int) int
+		VehicleInfo   func(childComplexity int) int
+	}
+
+	VehicleViolationScoringItems struct {
+		CreateAt                 func(childComplexity int) int
+		CreateBy                 func(childComplexity int) int
+		DeductionCategory        func(childComplexity int) int
+		DeductionItemDescription func(childComplexity int) int
+		DeleteAt                 func(childComplexity int) int
+		DeleteBy                 func(childComplexity int) int
+		DemeritPoints            func(childComplexity int) int
+		ID                       func(childComplexity int) int
+		IsDelete                 func(childComplexity int) int
+		UpdateAt                 func(childComplexity int) int
+		UpdateBy                 func(childComplexity int) int
+		ViolationScoringItemID   func(childComplexity int) int
+	}
+
+	VehicleViolationScoringRecord struct {
+		CreateAt             func(childComplexity int) int
+		CreateBy             func(childComplexity int) int
+		DeleteAt             func(childComplexity int) int
+		DeleteBy             func(childComplexity int) int
+		DemeritPoints        func(childComplexity int) int
+		ID                   func(childComplexity int) int
+		IsDelete             func(childComplexity int) int
+		Remarks              func(childComplexity int) int
+		UpdateAt             func(childComplexity int) int
+		UpdateBy             func(childComplexity int) int
+		VehicleID            func(childComplexity int) int
+		ViolationScoringID   func(childComplexity int) int
+		ViolationScoringItem func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
 	CreateVehicleInfo(ctx context.Context, req model.NewVehicleInfo) (*model.VehicleInfo, error)
 	UpdateVehicleInfo(ctx context.Context, req model.NewVehicleInfo) (*model.VehicleInfo, error)
-	DeleteVehicleInfo(ctx context.Context, req model.NewVehicleInfo) (*model.VehicleInfo, error)
+	DeleteVehicleInfo(ctx context.Context, id int) (*model.VehicleInfo, error)
 	CreateDriverInfo(ctx context.Context, req model.NewDriverInfo) (*model.DriverInfo, error)
 	UpdateDriverInfo(ctx context.Context, req model.NewDriverInfo) (*model.DriverInfo, error)
-	DeleteDriverInfo(ctx context.Context, req model.NewDriverInfo) (*model.DriverInfo, error)
+	DeleteDriverInfo(ctx context.Context, id int) (*model.DriverInfo, error)
 	CreateVehicleDriverBinding(ctx context.Context, req model.NewVehicleDriverBinding) (*model.VehicleDriverBinding, error)
 	UpdateVehicleDriverBinding(ctx context.Context, req model.NewVehicleDriverBinding) (*model.VehicleDriverBinding, error)
-	DeleteVehicleDriverBinding(ctx context.Context, req model.NewVehicleDriverBinding) (*model.VehicleDriverBinding, error)
+	DeleteVehicleDriverBinding(ctx context.Context, id int) (*model.VehicleDriverBinding, error)
 }
 type QueryResolver interface {
 	GetDistrictVehicleList(ctx context.Context, paging *model.DataPage, sorting *model.SortDirection) ([]*model.DistrictCount, error)
 	GetVehicleInfoList(ctx context.Context, filter *model.VehicleInfoFilter, paging *model.DataPage, sorting *model.VehicleDataSort) ([]*model.VehicleInfo, error)
+	GetVehicleAlarmDataList(ctx context.Context, paging *model.DataPage, sorting *model.SortDirection) ([]*model.VehicleAlarmData, error)
 	GetDistrictDriverList(ctx context.Context, paging *model.DataPage, sorting *model.SortDirection) ([]*model.DistrictCount, error)
 	GetDriverInfoList(ctx context.Context, filter *model.DriverInfoFilter, paging *model.DataPage, sorting *model.DriverDataSort) ([]*model.DriverInfo, error)
-	GetVehicleDriverBinding(ctx context.Context, filter *model.DriverInfoFilter, paging *model.DataPage, sorting *model.DriverDataSort) ([]*model.VehicleDriverBinding, error)
+	GetVehicleDriverBinding(ctx context.Context, filter *model.VehicleDriverBindingFilter, paging *model.DataPage, sorting *model.VehicleDriverBindingDataSort) ([]*model.VehicleDriverBinding, error)
+	GetDistrictVehicleViolationList(ctx context.Context, filter *model.DistrictVehicleViolationListFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.DistrictCount, error)
+	GetVehicleViolationDetailList(ctx context.Context, filter *model.VehicleViolationDetailListFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.VehicleViolationDetails, error)
+	GetDistrictVehicleViolationHandleList(ctx context.Context, filter *model.DistrictVehicleViolationHandleListFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.DistrictCount, error)
+	GetDriverViolationList(ctx context.Context, filter *model.DriverViolationListFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.VehicleViolationDetails, error)
+	GetDriverThreeScoringCycleData(ctx context.Context, filter *model.DriverThreeScoringCycleDataFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.DriverThreeScoringCycleData, error)
+	GetVehicleViolationRankData(ctx context.Context, filter *model.VehicleViolationRankDataFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.VehicleViolationRankData, error)
+	GetDistrictTenTypeIllegalData(ctx context.Context, filter *model.DistrictTenTypeIllegalDataFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.DistrictTenTypeIllegalData, error)
+	GetDriverDrinkAndDrugData(ctx context.Context, filter *model.DriverDrinkAndDrugDataFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.DriverDrinkAndDrugData, error)
+	GetFourTypeKeyVehicleViolationClear(ctx context.Context, filter *model.FourTypeKeyVehicleViolationClearFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.FourTypeKeyVehicleViolationClear, error)
+	GetIllegalRateOfVehicle(ctx context.Context, filter *model.IllegalRateOfVehicleFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.IllegalRateOfVehicle, error)
+	GetSingleCarIllegalStatistics(ctx context.Context, filter *model.SingleCarIllegalStatisticsFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.SingleCarIllegalStatistics, error)
+	GetSmsRemindLog(ctx context.Context, filter *model.SmsRemindLogFilter, paging *model.DataPage, sorting *model.SortDirection) ([]*model.SmsRemindLog, error)
+}
+type SubscriptionResolver interface {
+	NewVehicleAlarmData(ctx context.Context, typeArg *model.AlarmType) (<-chan *model.VehicleAlarmData, error)
 }
 
 type executableSchema struct {
@@ -281,6 +596,293 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.BusinessScopeInfo.Number(childComplexity), true
 
+	case "CycleViolationData.demerit_points":
+		if e.complexity.CycleViolationData.DemeritPoints == nil {
+			break
+		}
+
+		return e.complexity.CycleViolationData.DemeritPoints(childComplexity), true
+
+	case "CycleViolationData.number_of_violation":
+		if e.complexity.CycleViolationData.NumberOfViolation == nil {
+			break
+		}
+
+		return e.complexity.CycleViolationData.NumberOfViolation(childComplexity), true
+
+	case "CycleViolationData.penalty":
+		if e.complexity.CycleViolationData.Penalty == nil {
+			break
+		}
+
+		return e.complexity.CycleViolationData.Penalty(childComplexity), true
+
+	case "DisputeViolationRecord.agent_id_number":
+		if e.complexity.DisputeViolationRecord.AgentIDNumber == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.AgentIDNumber(childComplexity), true
+
+	case "DisputeViolationRecord.approve_state":
+		if e.complexity.DisputeViolationRecord.ApproveState == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.ApproveState(childComplexity), true
+
+	case "DisputeViolationRecord.business_license":
+		if e.complexity.DisputeViolationRecord.BusinessLicense == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.BusinessLicense(childComplexity), true
+
+	case "DisputeViolationRecord.contact_address":
+		if e.complexity.DisputeViolationRecord.ContactAddress == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.ContactAddress(childComplexity), true
+
+	case "DisputeViolationRecord.create_at":
+		if e.complexity.DisputeViolationRecord.CreateAt == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.CreateAt(childComplexity), true
+
+	case "DisputeViolationRecord.create_by":
+		if e.complexity.DisputeViolationRecord.CreateBy == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.CreateBy(childComplexity), true
+
+	case "DisputeViolationRecord.delete_at":
+		if e.complexity.DisputeViolationRecord.DeleteAt == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.DeleteAt(childComplexity), true
+
+	case "DisputeViolationRecord.delete_by":
+		if e.complexity.DisputeViolationRecord.DeleteBy == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.DeleteBy(childComplexity), true
+
+	case "DisputeViolationRecord.dispute_violation_id":
+		if e.complexity.DisputeViolationRecord.DisputeViolationID == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.DisputeViolationID(childComplexity), true
+
+	case "DisputeViolationRecord.driver_license":
+		if e.complexity.DisputeViolationRecord.DriverLicense == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.DriverLicense(childComplexity), true
+
+	case "DisputeViolationRecord.driving_license":
+		if e.complexity.DisputeViolationRecord.DrivingLicense == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.DrivingLicense(childComplexity), true
+
+	case "DisputeViolationRecord.driving_log":
+		if e.complexity.DisputeViolationRecord.DrivingLog == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.DrivingLog(childComplexity), true
+
+	case "DisputeViolationRecord.id":
+		if e.complexity.DisputeViolationRecord.ID == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.ID(childComplexity), true
+
+	case "DisputeViolationRecord.id_card":
+		if e.complexity.DisputeViolationRecord.IDCard == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.IDCard(childComplexity), true
+
+	case "DisputeViolationRecord.is_delete":
+		if e.complexity.DisputeViolationRecord.IsDelete == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.IsDelete(childComplexity), true
+
+	case "DisputeViolationRecord.labor_contract":
+		if e.complexity.DisputeViolationRecord.LaborContract == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.LaborContract(childComplexity), true
+
+	case "DisputeViolationRecord.legal_person_id_number":
+		if e.complexity.DisputeViolationRecord.LegalPersonIDNumber == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.LegalPersonIDNumber(childComplexity), true
+
+	case "DisputeViolationRecord.organization_code":
+		if e.complexity.DisputeViolationRecord.OrganizationCode == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.OrganizationCode(childComplexity), true
+
+	case "DisputeViolationRecord.other_evidence":
+		if e.complexity.DisputeViolationRecord.OtherEvidence == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.OtherEvidence(childComplexity), true
+
+	case "DisputeViolationRecord.pic_evidence":
+		if e.complexity.DisputeViolationRecord.PicEvidence == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.PicEvidence(childComplexity), true
+
+	case "DisputeViolationRecord.statement":
+		if e.complexity.DisputeViolationRecord.Statement == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.Statement(childComplexity), true
+
+	case "DisputeViolationRecord.update_at":
+		if e.complexity.DisputeViolationRecord.UpdateAt == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.UpdateAt(childComplexity), true
+
+	case "DisputeViolationRecord.update_by":
+		if e.complexity.DisputeViolationRecord.UpdateBy == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.UpdateBy(childComplexity), true
+
+	case "DisputeViolationRecord.update_time_in":
+		if e.complexity.DisputeViolationRecord.UpdateTimeIn == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.UpdateTimeIn(childComplexity), true
+
+	case "DisputeViolationRecord.vehicle_manager_id_card":
+		if e.complexity.DisputeViolationRecord.VehicleManagerIDCard == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.VehicleManagerIDCard(childComplexity), true
+
+	case "DisputeViolationRecord.violation_detail":
+		if e.complexity.DisputeViolationRecord.ViolationDetail == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.ViolationDetail(childComplexity), true
+
+	case "DisputeViolationRecord.witness":
+		if e.complexity.DisputeViolationRecord.Witness == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.Witness(childComplexity), true
+
+	case "DisputeViolationRecord.written_application_materials":
+		if e.complexity.DisputeViolationRecord.WrittenApplicationMaterials == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecord.WrittenApplicationMaterials(childComplexity), true
+
+	case "DisputeViolationRecordLog.approver":
+		if e.complexity.DisputeViolationRecordLog.Approver == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecordLog.Approver(childComplexity), true
+
+	case "DisputeViolationRecordLog.dispute_violation_data":
+		if e.complexity.DisputeViolationRecordLog.DisputeViolationData == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecordLog.DisputeViolationData(childComplexity), true
+
+	case "DisputeViolationRecordLog.dispute_violation_log_id":
+		if e.complexity.DisputeViolationRecordLog.DisputeViolationLogID == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecordLog.DisputeViolationLogID(childComplexity), true
+
+	case "DisputeViolationRecordLog.id":
+		if e.complexity.DisputeViolationRecordLog.ID == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecordLog.ID(childComplexity), true
+
+	case "DisputeViolationRecordLog.review_action_name":
+		if e.complexity.DisputeViolationRecordLog.ReviewActionName == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecordLog.ReviewActionName(childComplexity), true
+
+	case "DisputeViolationRecordLog.review_opinion":
+		if e.complexity.DisputeViolationRecordLog.ReviewOpinion == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecordLog.ReviewOpinion(childComplexity), true
+
+	case "DisputeViolationRecordLog.review_result":
+		if e.complexity.DisputeViolationRecordLog.ReviewResult == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecordLog.ReviewResult(childComplexity), true
+
+	case "DisputeViolationRecordLog.review_time":
+		if e.complexity.DisputeViolationRecordLog.ReviewTime == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecordLog.ReviewTime(childComplexity), true
+
+	case "DisputeViolationRecordLog.reviewer":
+		if e.complexity.DisputeViolationRecordLog.Reviewer == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecordLog.Reviewer(childComplexity), true
+
+	case "DisputeViolationRecordLog.update_time_in":
+		if e.complexity.DisputeViolationRecordLog.UpdateTimeIn == nil {
+			break
+		}
+
+		return e.complexity.DisputeViolationRecordLog.UpdateTimeIn(childComplexity), true
+
 	case "DistrictCount.business_scope_info_list":
 		if e.complexity.DistrictCount.BusinessScopeInfoList == nil {
 			break
@@ -294,6 +896,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DistrictCount.DistrictName(childComplexity), true
+
+	case "DistrictTenTypeIllegalData.district_name":
+		if e.complexity.DistrictTenTypeIllegalData.DistrictName == nil {
+			break
+		}
+
+		return e.complexity.DistrictTenTypeIllegalData.DistrictName(childComplexity), true
+
+	case "DistrictTenTypeIllegalData.illegal_data":
+		if e.complexity.DistrictTenTypeIllegalData.IllegalData == nil {
+			break
+		}
+
+		return e.complexity.DistrictTenTypeIllegalData.IllegalData(childComplexity), true
+
+	case "DriverDrinkAndDrugData.driver_info":
+		if e.complexity.DriverDrinkAndDrugData.DriverInfo == nil {
+			break
+		}
+
+		return e.complexity.DriverDrinkAndDrugData.DriverInfo(childComplexity), true
+
+	case "DriverDrinkAndDrugData.illegal_data":
+		if e.complexity.DriverDrinkAndDrugData.IllegalData == nil {
+			break
+		}
+
+		return e.complexity.DriverDrinkAndDrugData.IllegalData(childComplexity), true
 
 	case "DriverIdentity.accumulatived_points":
 		if e.complexity.DriverIdentity.AccumulativedPoints == nil {
@@ -778,6 +1408,125 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DriverInfo.UpdateTimeIn(childComplexity), true
 
+	case "DriverThreeScoringCycleData.CycleViolationDataList":
+		if e.complexity.DriverThreeScoringCycleData.CycleViolationDataList == nil {
+			break
+		}
+
+		return e.complexity.DriverThreeScoringCycleData.CycleViolationDataList(childComplexity), true
+
+	case "DriverThreeScoringCycleData.driver_info":
+		if e.complexity.DriverThreeScoringCycleData.DriverInfo == nil {
+			break
+		}
+
+		return e.complexity.DriverThreeScoringCycleData.DriverInfo(childComplexity), true
+
+	case "FourTypeKeyVehicleViolation.handle_number":
+		if e.complexity.FourTypeKeyVehicleViolation.HandleNumber == nil {
+			break
+		}
+
+		return e.complexity.FourTypeKeyVehicleViolation.HandleNumber(childComplexity), true
+
+	case "FourTypeKeyVehicleViolation.Illegal_handle_rate":
+		if e.complexity.FourTypeKeyVehicleViolation.IllegalHandleRate == nil {
+			break
+		}
+
+		return e.complexity.FourTypeKeyVehicleViolation.IllegalHandleRate(childComplexity), true
+
+	case "FourTypeKeyVehicleViolation.total":
+		if e.complexity.FourTypeKeyVehicleViolation.Total == nil {
+			break
+		}
+
+		return e.complexity.FourTypeKeyVehicleViolation.Total(childComplexity), true
+
+	case "FourTypeKeyVehicleViolation.unhandled_number":
+		if e.complexity.FourTypeKeyVehicleViolation.UnhandledNumber == nil {
+			break
+		}
+
+		return e.complexity.FourTypeKeyVehicleViolation.UnhandledNumber(childComplexity), true
+
+	case "FourTypeKeyVehicleViolationClear.district_name":
+		if e.complexity.FourTypeKeyVehicleViolationClear.DistrictName == nil {
+			break
+		}
+
+		return e.complexity.FourTypeKeyVehicleViolationClear.DistrictName(childComplexity), true
+
+	case "FourTypeKeyVehicleViolationClear.handle_data":
+		if e.complexity.FourTypeKeyVehicleViolationClear.HandleData == nil {
+			break
+		}
+
+		return e.complexity.FourTypeKeyVehicleViolationClear.HandleData(childComplexity), true
+
+	case "IllegalRateOfVehicle.district_name":
+		if e.complexity.IllegalRateOfVehicle.DistrictName == nil {
+			break
+		}
+
+		return e.complexity.IllegalRateOfVehicle.DistrictName(childComplexity), true
+
+	case "IllegalRateOfVehicle.enterprise_address":
+		if e.complexity.IllegalRateOfVehicle.EnterpriseAddress == nil {
+			break
+		}
+
+		return e.complexity.IllegalRateOfVehicle.EnterpriseAddress(childComplexity), true
+
+	case "IllegalRateOfVehicle.enterprise_name":
+		if e.complexity.IllegalRateOfVehicle.EnterpriseName == nil {
+			break
+		}
+
+		return e.complexity.IllegalRateOfVehicle.EnterpriseName(childComplexity), true
+
+	case "IllegalRateOfVehicle.handle_number":
+		if e.complexity.IllegalRateOfVehicle.HandleNumber == nil {
+			break
+		}
+
+		return e.complexity.IllegalRateOfVehicle.HandleNumber(childComplexity), true
+
+	case "IllegalRateOfVehicle.Illegal_handle_rate":
+		if e.complexity.IllegalRateOfVehicle.IllegalHandleRate == nil {
+			break
+		}
+
+		return e.complexity.IllegalRateOfVehicle.IllegalHandleRate(childComplexity), true
+
+	case "IllegalRateOfVehicle.number_of_illegal_vehicle":
+		if e.complexity.IllegalRateOfVehicle.NumberOfIllegalVehicle == nil {
+			break
+		}
+
+		return e.complexity.IllegalRateOfVehicle.NumberOfIllegalVehicle(childComplexity), true
+
+	case "IllegalRateOfVehicle.total_number_of_vehicle":
+		if e.complexity.IllegalRateOfVehicle.TotalNumberOfVehicle == nil {
+			break
+		}
+
+		return e.complexity.IllegalRateOfVehicle.TotalNumberOfVehicle(childComplexity), true
+
+	case "IllegalRateOfVehicle.total_number_of_violations":
+		if e.complexity.IllegalRateOfVehicle.TotalNumberOfViolations == nil {
+			break
+		}
+
+		return e.complexity.IllegalRateOfVehicle.TotalNumberOfViolations(childComplexity), true
+
+	case "IllegalRateOfVehicle.unhandled_number":
+		if e.complexity.IllegalRateOfVehicle.UnhandledNumber == nil {
+			break
+		}
+
+		return e.complexity.IllegalRateOfVehicle.UnhandledNumber(childComplexity), true
+
 	case "Mutation.createDriverInfo":
 		if e.complexity.Mutation.CreateDriverInfo == nil {
 			break
@@ -824,7 +1573,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteDriverInfo(childComplexity, args["req"].(model.NewDriverInfo)), true
+		return e.complexity.Mutation.DeleteDriverInfo(childComplexity, args["id"].(int)), true
 
 	case "Mutation.deleteVehicleDriverBinding":
 		if e.complexity.Mutation.DeleteVehicleDriverBinding == nil {
@@ -836,7 +1585,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteVehicleDriverBinding(childComplexity, args["req"].(model.NewVehicleDriverBinding)), true
+		return e.complexity.Mutation.DeleteVehicleDriverBinding(childComplexity, args["id"].(int)), true
 
 	case "Mutation.deleteVehicleInfo":
 		if e.complexity.Mutation.DeleteVehicleInfo == nil {
@@ -848,7 +1597,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteVehicleInfo(childComplexity, args["req"].(model.NewVehicleInfo)), true
+		return e.complexity.Mutation.DeleteVehicleInfo(childComplexity, args["id"].(int)), true
 
 	case "Mutation.updateDriverInfo":
 		if e.complexity.Mutation.UpdateDriverInfo == nil {
@@ -886,6 +1635,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateVehicleInfo(childComplexity, args["req"].(model.NewVehicleInfo)), true
 
+	case "Point.latitude":
+		if e.complexity.Point.Latitude == nil {
+			break
+		}
+
+		return e.complexity.Point.Latitude(childComplexity), true
+
+	case "Point.longitude":
+		if e.complexity.Point.Longitude == nil {
+			break
+		}
+
+		return e.complexity.Point.Longitude(childComplexity), true
+
 	case "Query.getDistrictDriverList":
 		if e.complexity.Query.GetDistrictDriverList == nil {
 			break
@@ -897,6 +1660,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetDistrictDriverList(childComplexity, args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
+	case "Query.getDistrictTenTypeIllegalData":
+		if e.complexity.Query.GetDistrictTenTypeIllegalData == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getDistrictTenTypeIllegalData_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetDistrictTenTypeIllegalData(childComplexity, args["filter"].(*model.DistrictTenTypeIllegalDataFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
 
 	case "Query.getDistrictVehicleList":
 		if e.complexity.Query.GetDistrictVehicleList == nil {
@@ -910,6 +1685,42 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetDistrictVehicleList(childComplexity, args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
 
+	case "Query.getDistrictVehicleViolationHandleList":
+		if e.complexity.Query.GetDistrictVehicleViolationHandleList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getDistrictVehicleViolationHandleList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetDistrictVehicleViolationHandleList(childComplexity, args["filter"].(*model.DistrictVehicleViolationHandleListFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
+	case "Query.getDistrictVehicleViolationList":
+		if e.complexity.Query.GetDistrictVehicleViolationList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getDistrictVehicleViolationList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetDistrictVehicleViolationList(childComplexity, args["filter"].(*model.DistrictVehicleViolationListFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
+	case "Query.getDriverDrinkAndDrugData":
+		if e.complexity.Query.GetDriverDrinkAndDrugData == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getDriverDrinkAndDrugData_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetDriverDrinkAndDrugData(childComplexity, args["filter"].(*model.DriverDrinkAndDrugDataFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
 	case "Query.getDriverInfoList":
 		if e.complexity.Query.GetDriverInfoList == nil {
 			break
@@ -922,6 +1733,90 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetDriverInfoList(childComplexity, args["filter"].(*model.DriverInfoFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.DriverDataSort)), true
 
+	case "Query.getDriverThreeScoringCycleData":
+		if e.complexity.Query.GetDriverThreeScoringCycleData == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getDriverThreeScoringCycleData_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetDriverThreeScoringCycleData(childComplexity, args["filter"].(*model.DriverThreeScoringCycleDataFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
+	case "Query.getDriverViolationList":
+		if e.complexity.Query.GetDriverViolationList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getDriverViolationList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetDriverViolationList(childComplexity, args["filter"].(*model.DriverViolationListFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
+	case "Query.getFourTypeKeyVehicleViolationClear":
+		if e.complexity.Query.GetFourTypeKeyVehicleViolationClear == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getFourTypeKeyVehicleViolationClear_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetFourTypeKeyVehicleViolationClear(childComplexity, args["filter"].(*model.FourTypeKeyVehicleViolationClearFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
+	case "Query.getIllegalRateOfVehicle":
+		if e.complexity.Query.GetIllegalRateOfVehicle == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getIllegalRateOfVehicle_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetIllegalRateOfVehicle(childComplexity, args["filter"].(*model.IllegalRateOfVehicleFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
+	case "Query.getSingleCarIllegalStatistics":
+		if e.complexity.Query.GetSingleCarIllegalStatistics == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSingleCarIllegalStatistics_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSingleCarIllegalStatistics(childComplexity, args["filter"].(*model.SingleCarIllegalStatisticsFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
+	case "Query.getSmsRemindLog":
+		if e.complexity.Query.GetSmsRemindLog == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getSmsRemindLog_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetSmsRemindLog(childComplexity, args["filter"].(*model.SmsRemindLogFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
+	case "Query.getVehicleAlarmDataList":
+		if e.complexity.Query.GetVehicleAlarmDataList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getVehicleAlarmDataList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetVehicleAlarmDataList(childComplexity, args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
 	case "Query.getVehicleDriverBinding":
 		if e.complexity.Query.GetVehicleDriverBinding == nil {
 			break
@@ -932,7 +1827,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetVehicleDriverBinding(childComplexity, args["filter"].(*model.DriverInfoFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.DriverDataSort)), true
+		return e.complexity.Query.GetVehicleDriverBinding(childComplexity, args["filter"].(*model.VehicleDriverBindingFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.VehicleDriverBindingDataSort)), true
 
 	case "Query.getVehicleInfoList":
 		if e.complexity.Query.GetVehicleInfoList == nil {
@@ -945,6 +1840,511 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetVehicleInfoList(childComplexity, args["filter"].(*model.VehicleInfoFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.VehicleDataSort)), true
+
+	case "Query.getVehicleViolationDetailList":
+		if e.complexity.Query.GetVehicleViolationDetailList == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getVehicleViolationDetailList_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetVehicleViolationDetailList(childComplexity, args["filter"].(*model.VehicleViolationDetailListFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
+	case "Query.getVehicleViolationRankData":
+		if e.complexity.Query.GetVehicleViolationRankData == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getVehicleViolationRankData_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetVehicleViolationRankData(childComplexity, args["filter"].(*model.VehicleViolationRankDataFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection)), true
+
+	case "RegionalViolationRegister.create_at":
+		if e.complexity.RegionalViolationRegister.CreateAt == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.CreateAt(childComplexity), true
+
+	case "RegionalViolationRegister.create_by":
+		if e.complexity.RegionalViolationRegister.CreateBy == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.CreateBy(childComplexity), true
+
+	case "RegionalViolationRegister.delete_at":
+		if e.complexity.RegionalViolationRegister.DeleteAt == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.DeleteAt(childComplexity), true
+
+	case "RegionalViolationRegister.delete_by":
+		if e.complexity.RegionalViolationRegister.DeleteBy == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.DeleteBy(childComplexity), true
+
+	case "RegionalViolationRegister.driver_info":
+		if e.complexity.RegionalViolationRegister.DriverInfo == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.DriverInfo(childComplexity), true
+
+	case "RegionalViolationRegister.id":
+		if e.complexity.RegionalViolationRegister.ID == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.ID(childComplexity), true
+
+	case "RegionalViolationRegister.illegal_data":
+		if e.complexity.RegionalViolationRegister.IllegalData == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.IllegalData(childComplexity), true
+
+	case "RegionalViolationRegister.illegal_time":
+		if e.complexity.RegionalViolationRegister.IllegalTime == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.IllegalTime(childComplexity), true
+
+	case "RegionalViolationRegister.illegal_type":
+		if e.complexity.RegionalViolationRegister.IllegalType == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.IllegalType(childComplexity), true
+
+	case "RegionalViolationRegister.is_delete":
+		if e.complexity.RegionalViolationRegister.IsDelete == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.IsDelete(childComplexity), true
+
+	case "RegionalViolationRegister.is_register":
+		if e.complexity.RegionalViolationRegister.IsRegister == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.IsRegister(childComplexity), true
+
+	case "RegionalViolationRegister.operator":
+		if e.complexity.RegionalViolationRegister.Operator == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.Operator(childComplexity), true
+
+	case "RegionalViolationRegister.processing_agency":
+		if e.complexity.RegionalViolationRegister.ProcessingAgency == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.ProcessingAgency(childComplexity), true
+
+	case "RegionalViolationRegister.regional_violation_register_id":
+		if e.complexity.RegionalViolationRegister.RegionalViolationRegisterID == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.RegionalViolationRegisterID(childComplexity), true
+
+	case "RegionalViolationRegister.register_time":
+		if e.complexity.RegionalViolationRegister.RegisterTime == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.RegisterTime(childComplexity), true
+
+	case "RegionalViolationRegister.update_at":
+		if e.complexity.RegionalViolationRegister.UpdateAt == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.UpdateAt(childComplexity), true
+
+	case "RegionalViolationRegister.update_by":
+		if e.complexity.RegionalViolationRegister.UpdateBy == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.UpdateBy(childComplexity), true
+
+	case "RegionalViolationRegister.vehicle_info":
+		if e.complexity.RegionalViolationRegister.VehicleInfo == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.VehicleInfo(childComplexity), true
+
+	case "RegionalViolationRegister.violation_detail":
+		if e.complexity.RegionalViolationRegister.ViolationDetail == nil {
+			break
+		}
+
+		return e.complexity.RegionalViolationRegister.ViolationDetail(childComplexity), true
+
+	case "SingleCarIllegalStatistics.district_name":
+		if e.complexity.SingleCarIllegalStatistics.DistrictName == nil {
+			break
+		}
+
+		return e.complexity.SingleCarIllegalStatistics.DistrictName(childComplexity), true
+
+	case "SingleCarIllegalStatistics.driver_info":
+		if e.complexity.SingleCarIllegalStatistics.DriverInfo == nil {
+			break
+		}
+
+		return e.complexity.SingleCarIllegalStatistics.DriverInfo(childComplexity), true
+
+	case "SingleCarIllegalStatistics.enterprise_address":
+		if e.complexity.SingleCarIllegalStatistics.EnterpriseAddress == nil {
+			break
+		}
+
+		return e.complexity.SingleCarIllegalStatistics.EnterpriseAddress(childComplexity), true
+
+	case "SingleCarIllegalStatistics.enterprise_name":
+		if e.complexity.SingleCarIllegalStatistics.EnterpriseName == nil {
+			break
+		}
+
+		return e.complexity.SingleCarIllegalStatistics.EnterpriseName(childComplexity), true
+
+	case "SingleCarIllegalStatistics.handle_number":
+		if e.complexity.SingleCarIllegalStatistics.HandleNumber == nil {
+			break
+		}
+
+		return e.complexity.SingleCarIllegalStatistics.HandleNumber(childComplexity), true
+
+	case "SingleCarIllegalStatistics.Illegal_handle_rate":
+		if e.complexity.SingleCarIllegalStatistics.IllegalHandleRate == nil {
+			break
+		}
+
+		return e.complexity.SingleCarIllegalStatistics.IllegalHandleRate(childComplexity), true
+
+	case "SingleCarIllegalStatistics.number_of_illegal_vehicle":
+		if e.complexity.SingleCarIllegalStatistics.NumberOfIllegalVehicle == nil {
+			break
+		}
+
+		return e.complexity.SingleCarIllegalStatistics.NumberOfIllegalVehicle(childComplexity), true
+
+	case "SingleCarIllegalStatistics.total_number_of_vehicle":
+		if e.complexity.SingleCarIllegalStatistics.TotalNumberOfVehicle == nil {
+			break
+		}
+
+		return e.complexity.SingleCarIllegalStatistics.TotalNumberOfVehicle(childComplexity), true
+
+	case "SingleCarIllegalStatistics.total_number_of_violations":
+		if e.complexity.SingleCarIllegalStatistics.TotalNumberOfViolations == nil {
+			break
+		}
+
+		return e.complexity.SingleCarIllegalStatistics.TotalNumberOfViolations(childComplexity), true
+
+	case "SingleCarIllegalStatistics.unhandled_number":
+		if e.complexity.SingleCarIllegalStatistics.UnhandledNumber == nil {
+			break
+		}
+
+		return e.complexity.SingleCarIllegalStatistics.UnhandledNumber(childComplexity), true
+
+	case "SmsRemindLog.cellphone_number":
+		if e.complexity.SmsRemindLog.CellphoneNumber == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.CellphoneNumber(childComplexity), true
+
+	case "SmsRemindLog.create_at":
+		if e.complexity.SmsRemindLog.CreateAt == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.CreateAt(childComplexity), true
+
+	case "SmsRemindLog.create_by":
+		if e.complexity.SmsRemindLog.CreateBy == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.CreateBy(childComplexity), true
+
+	case "SmsRemindLog.delete_at":
+		if e.complexity.SmsRemindLog.DeleteAt == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.DeleteAt(childComplexity), true
+
+	case "SmsRemindLog.delete_by":
+		if e.complexity.SmsRemindLog.DeleteBy == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.DeleteBy(childComplexity), true
+
+	case "SmsRemindLog.driver_info":
+		if e.complexity.SmsRemindLog.DriverInfo == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.DriverInfo(childComplexity), true
+
+	case "SmsRemindLog.id":
+		if e.complexity.SmsRemindLog.ID == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.ID(childComplexity), true
+
+	case "SmsRemindLog.is_delete":
+		if e.complexity.SmsRemindLog.IsDelete == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.IsDelete(childComplexity), true
+
+	case "SmsRemindLog.is_send":
+		if e.complexity.SmsRemindLog.IsSend == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.IsSend(childComplexity), true
+
+	case "SmsRemindLog.sms_content":
+		if e.complexity.SmsRemindLog.SmsContent == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.SmsContent(childComplexity), true
+
+	case "SmsRemindLog.sms_log_id":
+		if e.complexity.SmsRemindLog.SmsLogID == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.SmsLogID(childComplexity), true
+
+	case "SmsRemindLog.sms_type":
+		if e.complexity.SmsRemindLog.SmsType == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.SmsType(childComplexity), true
+
+	case "SmsRemindLog.update_at":
+		if e.complexity.SmsRemindLog.UpdateAt == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.UpdateAt(childComplexity), true
+
+	case "SmsRemindLog.update_by":
+		if e.complexity.SmsRemindLog.UpdateBy == nil {
+			break
+		}
+
+		return e.complexity.SmsRemindLog.UpdateBy(childComplexity), true
+
+	case "Subscription.newVehicleAlarmData":
+		if e.complexity.Subscription.NewVehicleAlarmData == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_newVehicleAlarmData_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.NewVehicleAlarmData(childComplexity, args["type"].(*model.AlarmType)), true
+
+	case "TenTypeIllegalData.number":
+		if e.complexity.TenTypeIllegalData.Number == nil {
+			break
+		}
+
+		return e.complexity.TenTypeIllegalData.Number(childComplexity), true
+
+	case "TenTypeIllegalData.type":
+		if e.complexity.TenTypeIllegalData.Type == nil {
+			break
+		}
+
+		return e.complexity.TenTypeIllegalData.Type(childComplexity), true
+
+	case "VIO_CODEWFDM.FKJE_MAX":
+		if e.complexity.VioCodewfdm.FkjeMax == nil {
+			break
+		}
+
+		return e.complexity.VioCodewfdm.FkjeMax(childComplexity), true
+
+	case "VIO_CODEWFDM.FKJE_MIN":
+		if e.complexity.VioCodewfdm.FkjeMin == nil {
+			break
+		}
+
+		return e.complexity.VioCodewfdm.FkjeMin(childComplexity), true
+
+	case "VIO_CODEWFDM.WFJFS":
+		if e.complexity.VioCodewfdm.Wfjfs == nil {
+			break
+		}
+
+		return e.complexity.VioCodewfdm.Wfjfs(childComplexity), true
+
+	case "VIO_CODEWFDM.WFMS":
+		if e.complexity.VioCodewfdm.Wfms == nil {
+			break
+		}
+
+		return e.complexity.VioCodewfdm.Wfms(childComplexity), true
+
+	case "VIO_CODEWFDM.WFXW":
+		if e.complexity.VioCodewfdm.Wfxw == nil {
+			break
+		}
+
+		return e.complexity.VioCodewfdm.Wfxw(childComplexity), true
+
+	case "VIO_CODEWFDM.XH":
+		if e.complexity.VioCodewfdm.Xh == nil {
+			break
+		}
+
+		return e.complexity.VioCodewfdm.Xh(childComplexity), true
+
+	case "VehicleAlarmData.alarm_begin_time":
+		if e.complexity.VehicleAlarmData.AlarmBeginTime == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.AlarmBeginTime(childComplexity), true
+
+	case "VehicleAlarmData.alarm_data_id":
+		if e.complexity.VehicleAlarmData.AlarmDataID == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.AlarmDataID(childComplexity), true
+
+	case "VehicleAlarmData.alarm_end_time":
+		if e.complexity.VehicleAlarmData.AlarmEndTime == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.AlarmEndTime(childComplexity), true
+
+	case "VehicleAlarmData.alarm_type":
+		if e.complexity.VehicleAlarmData.AlarmType == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.AlarmType(childComplexity), true
+
+	case "VehicleAlarmData.coordinate":
+		if e.complexity.VehicleAlarmData.Coordinate == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.Coordinate(childComplexity), true
+
+	case "VehicleAlarmData.deal_desc":
+		if e.complexity.VehicleAlarmData.DealDesc == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.DealDesc(childComplexity), true
+
+	case "VehicleAlarmData.dealing_status":
+		if e.complexity.VehicleAlarmData.DealingStatus == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.DealingStatus(childComplexity), true
+
+	case "VehicleAlarmData.driving_speed":
+		if e.complexity.VehicleAlarmData.DrivingSpeed == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.DrivingSpeed(childComplexity), true
+
+	case "VehicleAlarmData.license_plate_color":
+		if e.complexity.VehicleAlarmData.LicensePlateColor == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.LicensePlateColor(childComplexity), true
+
+	case "VehicleAlarmData.license_plate_number":
+		if e.complexity.VehicleAlarmData.LicensePlateNumber == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.LicensePlateNumber(childComplexity), true
+
+	case "VehicleAlarmData.pid":
+		if e.complexity.VehicleAlarmData.Pid == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.Pid(childComplexity), true
+
+	case "VehicleAlarmData.pos_desc":
+		if e.complexity.VehicleAlarmData.PosDesc == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.PosDesc(childComplexity), true
+
+	case "VehicleAlarmData.record_time":
+		if e.complexity.VehicleAlarmData.RecordTime == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.RecordTime(childComplexity), true
+
+	case "VehicleAlarmData.speed":
+		if e.complexity.VehicleAlarmData.Speed == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.Speed(childComplexity), true
+
+	case "VehicleAlarmData.user_id":
+		if e.complexity.VehicleAlarmData.UserID == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.UserID(childComplexity), true
+
+	case "VehicleAlarmData.vehicle_id":
+		if e.complexity.VehicleAlarmData.VehicleID == nil {
+			break
+		}
+
+		return e.complexity.VehicleAlarmData.VehicleID(childComplexity), true
 
 	case "VehicleDriverBinding.create_at":
 		if e.complexity.VehicleDriverBinding.CreateAt == nil {
@@ -1457,6 +2857,587 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.VehicleMaintenance.MaintenanceKilometers(childComplexity), true
 
+	case "VehicleSupervisionPhoto.driver_id":
+		if e.complexity.VehicleSupervisionPhoto.DriverID == nil {
+			break
+		}
+
+		return e.complexity.VehicleSupervisionPhoto.DriverID(childComplexity), true
+
+	case "VehicleSupervisionPhoto.enterprise_id":
+		if e.complexity.VehicleSupervisionPhoto.EnterpriseID == nil {
+			break
+		}
+
+		return e.complexity.VehicleSupervisionPhoto.EnterpriseID(childComplexity), true
+
+	case "VehicleSupervisionPhoto.IMEI":
+		if e.complexity.VehicleSupervisionPhoto.Imei == nil {
+			break
+		}
+
+		return e.complexity.VehicleSupervisionPhoto.Imei(childComplexity), true
+
+	case "VehicleSupervisionPhoto.monitoring_pic":
+		if e.complexity.VehicleSupervisionPhoto.MonitoringPic == nil {
+			break
+		}
+
+		return e.complexity.VehicleSupervisionPhoto.MonitoringPic(childComplexity), true
+
+	case "VehicleSupervisionPhoto.monitoring_pic_upload_time":
+		if e.complexity.VehicleSupervisionPhoto.MonitoringPicUploadTime == nil {
+			break
+		}
+
+		return e.complexity.VehicleSupervisionPhoto.MonitoringPicUploadTime(childComplexity), true
+
+	case "VehicleSupervisionPhoto.SIM_number":
+		if e.complexity.VehicleSupervisionPhoto.SimNumber == nil {
+			break
+		}
+
+		return e.complexity.VehicleSupervisionPhoto.SimNumber(childComplexity), true
+
+	case "VehicleSupervisionPhoto.supervision_photo_id":
+		if e.complexity.VehicleSupervisionPhoto.SupervisionPhotoID == nil {
+			break
+		}
+
+		return e.complexity.VehicleSupervisionPhoto.SupervisionPhotoID(childComplexity), true
+
+	case "VehicleSupervisionPhoto.update_time":
+		if e.complexity.VehicleSupervisionPhoto.UpdateTime == nil {
+			break
+		}
+
+		return e.complexity.VehicleSupervisionPhoto.UpdateTime(childComplexity), true
+
+	case "VehicleSupervisionPhoto.vehicle_id":
+		if e.complexity.VehicleSupervisionPhoto.VehicleID == nil {
+			break
+		}
+
+		return e.complexity.VehicleSupervisionPhoto.VehicleID(childComplexity), true
+
+	case "VehicleTerminalStatus.acc":
+		if e.complexity.VehicleTerminalStatus.Acc == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.Acc(childComplexity), true
+
+	case "VehicleTerminalStatus.BD_open":
+		if e.complexity.VehicleTerminalStatus.BdOpen == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.BdOpen(childComplexity), true
+
+	case "VehicleTerminalStatus.brake":
+		if e.complexity.VehicleTerminalStatus.Brake == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.Brake(childComplexity), true
+
+	case "VehicleTerminalStatus.camera":
+		if e.complexity.VehicleTerminalStatus.Camera == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.Camera(childComplexity), true
+
+	case "VehicleTerminalStatus.driving_speed":
+		if e.complexity.VehicleTerminalStatus.DrivingSpeed == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.DrivingSpeed(childComplexity), true
+
+	case "VehicleTerminalStatus.far_lamp":
+		if e.complexity.VehicleTerminalStatus.FarLamp == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.FarLamp(childComplexity), true
+
+	case "VehicleTerminalStatus.front_door":
+		if e.complexity.VehicleTerminalStatus.FrontDoor == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.FrontDoor(childComplexity), true
+
+	case "VehicleTerminalStatus.GPS_open":
+		if e.complexity.VehicleTerminalStatus.GpsOpen == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.GpsOpen(childComplexity), true
+
+	case "VehicleTerminalStatus.id":
+		if e.complexity.VehicleTerminalStatus.ID == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.ID(childComplexity), true
+
+	case "VehicleTerminalStatus.left_lamp":
+		if e.complexity.VehicleTerminalStatus.LeftLamp == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.LeftLamp(childComplexity), true
+
+	case "VehicleTerminalStatus.locate":
+		if e.complexity.VehicleTerminalStatus.Locate == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.Locate(childComplexity), true
+
+	case "VehicleTerminalStatus.loud_speaker":
+		if e.complexity.VehicleTerminalStatus.LoudSpeaker == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.LoudSpeaker(childComplexity), true
+
+	case "VehicleTerminalStatus.near_lamp":
+		if e.complexity.VehicleTerminalStatus.NearLamp == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.NearLamp(childComplexity), true
+
+	case "VehicleTerminalStatus.record_time":
+		if e.complexity.VehicleTerminalStatus.RecordTime == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.RecordTime(childComplexity), true
+
+	case "VehicleTerminalStatus.remarks":
+		if e.complexity.VehicleTerminalStatus.Remarks == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.Remarks(childComplexity), true
+
+	case "VehicleTerminalStatus.right_lamp":
+		if e.complexity.VehicleTerminalStatus.RightLamp == nil {
+			break
+		}
+
+		return e.complexity.VehicleTerminalStatus.RightLamp(childComplexity), true
+
+	case "VehicleViolationDetails.create_at":
+		if e.complexity.VehicleViolationDetails.CreateAt == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.CreateAt(childComplexity), true
+
+	case "VehicleViolationDetails.create_by":
+		if e.complexity.VehicleViolationDetails.CreateBy == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.CreateBy(childComplexity), true
+
+	case "VehicleViolationDetails.decision_number":
+		if e.complexity.VehicleViolationDetails.DecisionNumber == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.DecisionNumber(childComplexity), true
+
+	case "VehicleViolationDetails.delete_at":
+		if e.complexity.VehicleViolationDetails.DeleteAt == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.DeleteAt(childComplexity), true
+
+	case "VehicleViolationDetails.delete_by":
+		if e.complexity.VehicleViolationDetails.DeleteBy == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.DeleteBy(childComplexity), true
+
+	case "VehicleViolationDetails.discovery_agency":
+		if e.complexity.VehicleViolationDetails.DiscoveryAgency == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.DiscoveryAgency(childComplexity), true
+
+	case "VehicleViolationDetails.driver_info":
+		if e.complexity.VehicleViolationDetails.DriverInfo == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.DriverInfo(childComplexity), true
+
+	case "VehicleViolationDetails.enterprise_id":
+		if e.complexity.VehicleViolationDetails.EnterpriseID == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.EnterpriseID(childComplexity), true
+
+	case "VehicleViolationDetails.handle_at":
+		if e.complexity.VehicleViolationDetails.HandleAt == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.HandleAt(childComplexity), true
+
+	case "VehicleViolationDetails.handle_by":
+		if e.complexity.VehicleViolationDetails.HandleBy == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.HandleBy(childComplexity), true
+
+	case "VehicleViolationDetails.id":
+		if e.complexity.VehicleViolationDetails.ID == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.ID(childComplexity), true
+
+	case "VehicleViolationDetails.illega_location":
+		if e.complexity.VehicleViolationDetails.IllegaLocation == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.IllegaLocation(childComplexity), true
+
+	case "VehicleViolationDetails.illegal_data":
+		if e.complexity.VehicleViolationDetails.IllegalData == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.IllegalData(childComplexity), true
+
+	case "VehicleViolationDetails.illegal_handling_status":
+		if e.complexity.VehicleViolationDetails.IllegalHandlingStatus == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.IllegalHandlingStatus(childComplexity), true
+
+	case "VehicleViolationDetails.illegal_photo":
+		if e.complexity.VehicleViolationDetails.IllegalPhoto == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.IllegalPhoto(childComplexity), true
+
+	case "VehicleViolationDetails.illegal_time":
+		if e.complexity.VehicleViolationDetails.IllegalTime == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.IllegalTime(childComplexity), true
+
+	case "VehicleViolationDetails.information_source":
+		if e.complexity.VehicleViolationDetails.InformationSource == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.InformationSource(childComplexity), true
+
+	case "VehicleViolationDetails.is_handle":
+		if e.complexity.VehicleViolationDetails.IsHandle == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.IsHandle(childComplexity), true
+
+	case "VehicleViolationDetails.is_notice_driver":
+		if e.complexity.VehicleViolationDetails.IsNoticeDriver == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.IsNoticeDriver(childComplexity), true
+
+	case "VehicleViolationDetails.is_send":
+		if e.complexity.VehicleViolationDetails.IsSend == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.IsSend(childComplexity), true
+
+	case "VehicleViolationDetails.measured_value":
+		if e.complexity.VehicleViolationDetails.MeasuredValue == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.MeasuredValue(childComplexity), true
+
+	case "VehicleViolationDetails.notice_time":
+		if e.complexity.VehicleViolationDetails.NoticeTime == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.NoticeTime(childComplexity), true
+
+	case "VehicleViolationDetails.party_name":
+		if e.complexity.VehicleViolationDetails.PartyName == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.PartyName(childComplexity), true
+
+	case "VehicleViolationDetails.payment_mark":
+		if e.complexity.VehicleViolationDetails.PaymentMark == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.PaymentMark(childComplexity), true
+
+	case "VehicleViolationDetails.standard_value":
+		if e.complexity.VehicleViolationDetails.StandardValue == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.StandardValue(childComplexity), true
+
+	case "VehicleViolationDetails.update_at":
+		if e.complexity.VehicleViolationDetails.UpdateAt == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.UpdateAt(childComplexity), true
+
+	case "VehicleViolationDetails.update_by":
+		if e.complexity.VehicleViolationDetails.UpdateBy == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.UpdateBy(childComplexity), true
+
+	case "VehicleViolationDetails.update_time_in":
+		if e.complexity.VehicleViolationDetails.UpdateTimeIn == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.UpdateTimeIn(childComplexity), true
+
+	case "VehicleViolationDetails.vehicle_info":
+		if e.complexity.VehicleViolationDetails.VehicleInfo == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.VehicleInfo(childComplexity), true
+
+	case "VehicleViolationDetails.vehicle_information":
+		if e.complexity.VehicleViolationDetails.VehicleInformation == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.VehicleInformation(childComplexity), true
+
+	case "VehicleViolationDetails.violation_detail_id":
+		if e.complexity.VehicleViolationDetails.ViolationDetailID == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationDetails.ViolationDetailID(childComplexity), true
+
+	case "VehicleViolationRankData.deduction_info":
+		if e.complexity.VehicleViolationRankData.DeductionInfo == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationRankData.DeductionInfo(childComplexity), true
+
+	case "VehicleViolationRankData.vehicle_info":
+		if e.complexity.VehicleViolationRankData.VehicleInfo == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationRankData.VehicleInfo(childComplexity), true
+
+	case "VehicleViolationScoringItems.create_at":
+		if e.complexity.VehicleViolationScoringItems.CreateAt == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.CreateAt(childComplexity), true
+
+	case "VehicleViolationScoringItems.create_by":
+		if e.complexity.VehicleViolationScoringItems.CreateBy == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.CreateBy(childComplexity), true
+
+	case "VehicleViolationScoringItems.deduction_category":
+		if e.complexity.VehicleViolationScoringItems.DeductionCategory == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.DeductionCategory(childComplexity), true
+
+	case "VehicleViolationScoringItems.deduction_item_description":
+		if e.complexity.VehicleViolationScoringItems.DeductionItemDescription == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.DeductionItemDescription(childComplexity), true
+
+	case "VehicleViolationScoringItems.delete_at":
+		if e.complexity.VehicleViolationScoringItems.DeleteAt == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.DeleteAt(childComplexity), true
+
+	case "VehicleViolationScoringItems.delete_by":
+		if e.complexity.VehicleViolationScoringItems.DeleteBy == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.DeleteBy(childComplexity), true
+
+	case "VehicleViolationScoringItems.demerit_points":
+		if e.complexity.VehicleViolationScoringItems.DemeritPoints == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.DemeritPoints(childComplexity), true
+
+	case "VehicleViolationScoringItems.id":
+		if e.complexity.VehicleViolationScoringItems.ID == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.ID(childComplexity), true
+
+	case "VehicleViolationScoringItems.is_delete":
+		if e.complexity.VehicleViolationScoringItems.IsDelete == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.IsDelete(childComplexity), true
+
+	case "VehicleViolationScoringItems.update_at":
+		if e.complexity.VehicleViolationScoringItems.UpdateAt == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.UpdateAt(childComplexity), true
+
+	case "VehicleViolationScoringItems.update_by":
+		if e.complexity.VehicleViolationScoringItems.UpdateBy == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.UpdateBy(childComplexity), true
+
+	case "VehicleViolationScoringItems.violation_scoring_item_id":
+		if e.complexity.VehicleViolationScoringItems.ViolationScoringItemID == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringItems.ViolationScoringItemID(childComplexity), true
+
+	case "VehicleViolationScoringRecord.create_at":
+		if e.complexity.VehicleViolationScoringRecord.CreateAt == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.CreateAt(childComplexity), true
+
+	case "VehicleViolationScoringRecord.create_by":
+		if e.complexity.VehicleViolationScoringRecord.CreateBy == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.CreateBy(childComplexity), true
+
+	case "VehicleViolationScoringRecord.delete_at":
+		if e.complexity.VehicleViolationScoringRecord.DeleteAt == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.DeleteAt(childComplexity), true
+
+	case "VehicleViolationScoringRecord.delete_by":
+		if e.complexity.VehicleViolationScoringRecord.DeleteBy == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.DeleteBy(childComplexity), true
+
+	case "VehicleViolationScoringRecord.demerit_points":
+		if e.complexity.VehicleViolationScoringRecord.DemeritPoints == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.DemeritPoints(childComplexity), true
+
+	case "VehicleViolationScoringRecord.id":
+		if e.complexity.VehicleViolationScoringRecord.ID == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.ID(childComplexity), true
+
+	case "VehicleViolationScoringRecord.is_delete":
+		if e.complexity.VehicleViolationScoringRecord.IsDelete == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.IsDelete(childComplexity), true
+
+	case "VehicleViolationScoringRecord.remarks":
+		if e.complexity.VehicleViolationScoringRecord.Remarks == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.Remarks(childComplexity), true
+
+	case "VehicleViolationScoringRecord.update_at":
+		if e.complexity.VehicleViolationScoringRecord.UpdateAt == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.UpdateAt(childComplexity), true
+
+	case "VehicleViolationScoringRecord.update_by":
+		if e.complexity.VehicleViolationScoringRecord.UpdateBy == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.UpdateBy(childComplexity), true
+
+	case "VehicleViolationScoringRecord.vehicle_id":
+		if e.complexity.VehicleViolationScoringRecord.VehicleID == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.VehicleID(childComplexity), true
+
+	case "VehicleViolationScoringRecord.violation_scoring_id":
+		if e.complexity.VehicleViolationScoringRecord.ViolationScoringID == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.ViolationScoringID(childComplexity), true
+
+	case "VehicleViolationScoringRecord.violation_scoring_item":
+		if e.complexity.VehicleViolationScoringRecord.ViolationScoringItem == nil {
+			break
+		}
+
+		return e.complexity.VehicleViolationScoringRecord.ViolationScoringItem(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -1495,6 +3476,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Subscription:
+		next := ec._Subscription(ctx, rc.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next()
+
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -1521,6 +3519,137 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	{Name: "graph/graphqls/alarmInfo.graphqls", Input: `
+"车辆监控图片"
+type VehicleSupervisionPhoto{
+    "由golang程序生成的xid，暴露到外部使用"
+    supervision_photo_id: String!
+    "车辆ID"
+    vehicle_id: String!
+    "驾驶员id"
+    driver_id: String!
+    "所在企业id"
+    enterprise_id: String!
+    "终端上报时间"
+    update_time: Time!
+    "监控图片地址"
+    monitoring_pic: String!
+    "监控图片上传时间"
+    monitoring_pic_upload_time: Time!
+    "终端IMEI"
+    IMEI: String!
+    "SIM卡号"
+    SIM_number: String!
+}
+
+"经纬度"
+type Point  {
+    "经度"
+    longitude: Float!
+    "纬度"
+    latitude: Float!
+}
+
+"车辆报警信息"
+type VehicleAlarmData{
+    "由golang程序生成的xid，暴露到外部使用"
+    alarm_data_id: String!
+    "车辆ID"
+    vehicle_id: String!
+    "所属区域ID"
+    pid: String!
+    "车辆速度"
+    speed: Float!
+    "记录时间"
+    record_time: Time!
+    "位置描述"
+    pos_desc: String!
+    "空间数据类型point表示经纬度"
+    coordinate: Point!
+    "行车记录仪速度"
+    driving_speed: Float!
+    "处理状态(1.处理中 2.处理完毕 3.不作处理 4.将来处理)"
+    dealing_status: Int!
+    "处理人"
+    user_id: String!
+    "处理描述"
+    deal_desc: String!
+    "报警类型(001.超速报警 002.疲劳驾驶报警 066.凌晨2点到5点行驶报警)"
+    alarm_type: Int!
+    "报警开始时间"
+    alarm_begin_time: Time!
+    "报警结束时间"
+    alarm_end_time: Time!
+    "车牌号"
+    license_plate_number: String!
+    "车牌颜色"
+    license_plate_color: Int!
+
+}
+
+"车辆终端达标情况"
+type VehicleTerminalStatus{
+    "主键id"
+    id: String!
+    "ACC状态"
+    acc: String!
+    "制动信号(刹车)"
+    brake: String!
+    "左转向灯信号"
+    left_lamp: String!
+    "右转向灯信号"
+    right_lamp: String!
+    "近光灯信号"
+    near_lamp: String!
+    "远光灯信号(大灯)"
+    far_lamp: String!
+    "喇叭信号"
+    loud_speaker: String!
+    "定位状态"
+    locate: String!
+    "前门"
+    front_door: String!
+    "GPS信号"
+    GPS_open: String!
+    "北斗信号"
+    BD_open: String!
+    "摄像头"
+    camera: String!
+    "车速"
+    driving_speed: String!
+    "备注"
+    remarks: String!
+    "记录时间"
+    record_time: Time!
+
+}
+
+"照片类别枚举"
+enum AlarmType {
+    "超速报警"
+    SPEEDING
+    "疲劳驾驶报警"
+    FATIGUE_DRIVING
+    "凌晨2点到5点行驶报警"
+    TWO_AM_TO_FIVE_AM
+}
+
+extend type Query {
+    "获取报警信息"
+    getVehicleAlarmDataList(
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [VehicleAlarmData!]!
+}
+
+type Subscription {
+    "订阅新的报警信息"
+    newVehicleAlarmData(
+        type: AlarmType = SPEEDING
+    ): VehicleAlarmData!
+}
+
+`, BuiltIn: false},
 	{Name: "graph/graphqls/driver.graphqls", Input: `"驾驶员信息"
 type DriverInfo implements TimeModel{
     "驾驶员外部编码,由golang程序生成的xid，暴露到外部使用"
@@ -1711,31 +3840,31 @@ type VehicleDriverBinding implements TimeModel{
 "驾驶员信息的输入"
 input NewDriverInfo {
     "驾驶员姓名"
-    driver_name: String!
+    driver_name: String
     "性别"
-    sex: Int!
+    sex: Int
     "驾驶员身份验证信息ID"
-    driver_identity_id: String!
+    driver_identity_id: String
     "身份证住址"
-    id_card_address: String!
+    id_card_address: String
     "所在企业"
-    enterprise_name: String!
+    enterprise_name: String
     "所在部门"
-    department_name: String!
+    department_name: String
     "手机号码"
     telephone: String
     "短信验证码"
-    SMS_verification_code: String!
+    SMS_verification_code: String
     "驾驶证发证所在地"
-    driver_license_address: String!
+    driver_license_address: String
     "档案编号(后6位)"
-    file_number: String!
+    file_number: String
     "驾驶员身份证"
-    id_card_pic: [Upload!]!
+    id_card_pic: [Upload]
     "驾驶员驾驶证"
-    driver_license: [Upload!]!
+    driver_license: [Upload]
     "劳动合同"
-    labor_contract: [Upload!]!
+    labor_contract: [Upload]
 }
 
 "车辆驾驶员绑定信息的输入"
@@ -1789,6 +3918,26 @@ input DriverDataSort {
     "排序字段"
     sortBy: SortableDriverField = created
 }
+
+"车辆驾驶员绑定信息可排序字段"
+enum SortableBindingField {
+    "创建时间"
+    created
+    "驾驶员身份验证信息ID"
+    driver_identity_id
+    "驾驶员id"
+    driver_id
+    "车辆id"
+    vehicle_id
+}
+
+"驾驶员信息数据排序"
+input VehicleDriverBindingDataSort {
+    "排序方向"
+    sort: SortDirection = DESCENDING
+    "排序字段"
+    sortBy: SortableBindingField = created
+}
 extend type Query {
     "查询县区管辖的经营范围的驾驶员数量"
     getDistrictDriverList(
@@ -1803,9 +3952,9 @@ extend type Query {
     ): [DriverInfo!]!
     "查询车辆与驾驶员绑定关系数据"
     getVehicleDriverBinding(
-        filter: DriverInfoFilter,
+        filter: VehicleDriverBindingFilter,
         paging: DataPage
-        sorting: DriverDataSort
+        sorting:VehicleDriverBindingDataSort
     ): [VehicleDriverBinding!]!
 }
 
@@ -1815,13 +3964,13 @@ extend type Mutation {
     "修改驾驶员信息"
     updateDriverInfo(req:NewDriverInfo!): DriverInfo!
     "删除驾驶员信息"
-    deleteDriverInfo(req:NewDriverInfo!): DriverInfo!
+    deleteDriverInfo(id:Int!): DriverInfo!
     "创建车辆与驾驶员绑定关系"
     createVehicleDriverBinding(req:NewVehicleDriverBinding!): VehicleDriverBinding!
     "编辑车辆与驾驶员绑定关系"
     updateVehicleDriverBinding(req:NewVehicleDriverBinding!): VehicleDriverBinding!
     "解绑车辆与驾驶员"
-    deleteVehicleDriverBinding(req:NewVehicleDriverBinding!): VehicleDriverBinding!
+    deleteVehicleDriverBinding(id: Int!): VehicleDriverBinding!
 }`, BuiltIn: false},
 	{Name: "graph/graphqls/schema.graphqls", Input: `scalar Time
 scalar Upload
@@ -2053,7 +4202,7 @@ input VehicleDataSort {
 }
 
 "车辆信息的输入"
-input NewVehicleInfo {
+input NewVehicleInfo  {
     "车牌号"
     license_plate_number: String
     "车牌颜色"
@@ -2102,8 +4251,635 @@ type Mutation {
     "修改车辆信息"
     updateVehicleInfo(req:NewVehicleInfo!): VehicleInfo!
     "删除车辆信息"
-    deleteVehicleInfo(req:NewVehicleInfo!): VehicleInfo!
+    deleteVehicleInfo(id:Int!): VehicleInfo!
 
+}`, BuiltIn: false},
+	{Name: "graph/graphqls/vehicleViolation.graphqls", Input: `
+"车辆违章明细"
+type VehicleViolationDetails implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    violation_detail_id: String!
+    "违章车辆信息"
+    vehicle_info: VehicleInfo
+    "违章驾驶员信息"
+    driver_info: DriverInfo
+    "所在企业id"
+    enterprise_id: String
+    "违法描述数据"
+    illegal_data: VIO_CODEWFDM
+    "违法时间"
+    illegal_time: Time
+    "违法处理状态"
+    illegal_handling_status: Int
+    "违法地点"
+    illega_location: String
+    "标准值"
+    standard_value: String
+    "实测值"
+    measured_value: String
+    "发现机构"
+    discovery_agency: String
+    "违法照片"
+    illegal_photo: String
+    "是否通知驾驶员"
+    is_notice_driver: Boolean
+    "通知时间"
+    notice_time: Time
+    "决定书号"
+    decision_number: String
+    "缴款标记"
+    payment_mark: String
+    "当事人姓名"
+    party_name: String
+    "信息来源：1，强制，2，非现场，0，简易"
+    information_source: Int
+    "驾驶人处理的交通违法记录对应的机动车信息"
+    vehicle_information: String
+    "内网更新时间"
+    update_time_in: Time
+    "是否处理"
+    is_handle: Boolean
+    "处理人"
+    handle_by: String
+    "处理时间"
+    handle_at: Time
+    "是否发送短信"
+    is_send: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"车辆违规计分记录"
+type VehicleViolationScoringRecord implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    violation_scoring_id: String!
+    "扣分车辆id"
+    vehicle_id: String
+    "扣分明细数据"
+    violation_scoring_item: VehicleViolationScoringItems
+    "扣分分值"
+    demerit_points: Float
+    "备注"
+    remarks: String
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"车辆违规计分项表"
+type VehicleViolationScoringItems implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    violation_scoring_item_id: String!
+    "扣分事项描述"
+    deduction_item_description: String
+    "扣分事项类别"
+    deduction_category: Int
+    "扣分分值"
+    demerit_points: Float
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"短信提醒日志表"
+type SmsRemindLog implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    sms_log_id: String!
+    "违章驾驶员信息"
+    driver_info: DriverInfo
+    "手机号码"
+    cellphone_number: String
+    "短信内容"
+    sms_content: String
+    "是否发送"
+    is_send: Boolean
+    "短信提醒类型"
+    sms_type: Int
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"违法描述字典表"
+type VIO_CODEWFDM {
+    "违法行为"
+    WFXW: String
+    "违法描述"
+    WFMS: String
+    "违法计分数"
+    WFJFS: Float
+    "最小罚款金额"
+    FKJE_MIN: Float
+    "最大罚款金额"
+    FKJE_MAX: Float
+    "序号"
+    XH: String
+}
+
+"区域处理机关交通违法违规登记表"
+type RegionalViolationRegister implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    regional_violation_register_id: String!
+    "违法明细数据"
+    violation_detail: VehicleViolationDetails
+    "违章车辆信息"
+    vehicle_info: VehicleInfo
+    "违章驾驶员信息"
+    driver_info: DriverInfo
+    "违法描述数据"
+    illegal_data: VIO_CODEWFDM
+    "违法时间"
+    illegal_time: Time
+    "类型(1车辆2驾驶员)"
+    illegal_type: Int
+    "登记时间"
+    register_time: Time
+    "处理机关"
+    processing_agency: String
+    "操作员"
+    operator: String
+    "类型(false未登记true已登记)"
+    is_register: Boolean
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"违章争议记录表"
+type DisputeViolationRecord implements TimeModel{
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    dispute_violation_id: String!
+    "违法明细数据"
+    violation_detail: VehicleViolationDetails
+    "书面申请材料"
+    written_application_materials: String
+    "劳动合同或租赁合同"
+    labor_contract: String
+    "行车日志"
+    driving_log: String
+    "证人证言"
+    witness: String
+    "当事人陈述"
+    statement: String
+    "图像证据材料"
+    pic_evidence: String
+    "行为人驾驶证"
+    driver_license: String
+    "机动车行驶证"
+    driving_license: String
+    "行为人身份证"
+    id_card: String
+    "机动车所有人营业执照"
+    business_license: String
+    "机动车所有人组织机构代码证"
+    organization_code: String
+    "法定代表人身份证"
+    legal_person_id_number: String
+    "委托代理人身份证"
+    agent_id_number: String
+    "机动车管理人身份证"
+    vehicle_manager_id_card: String
+    "其他证据材料"
+    other_evidence: [String]
+    "审批状态"
+    approve_state: Int
+    "内网更新时间"
+    update_time_in: Time
+    "联系地址"
+    contact_address: String
+    "是否删除"
+    is_delete: Boolean
+    "创建时间"
+    create_at: Time!
+    "创建人"
+    create_by: String!
+    "修改时间"
+    update_at: Time!
+    "修改人"
+    update_by: String!
+    "删除时间"
+    delete_at: Time
+    "删除人"
+    delete_by: String
+}
+
+"违章争议审批日志表"
+type DisputeViolationRecordLog {
+    "主键id"
+    id: ID!
+    "外部编码,由golang程序生成的xid，暴露到外部使用"
+    dispute_violation_log_id: String!
+    "违章争议记录表数据"
+    dispute_violation_data: DisputeViolationRecord
+    "审核人"
+    reviewer: String
+    "审核时间"
+    review_time: Time
+    "审核意见"
+    review_opinion: String
+    "审核结果"
+    review_result: String
+    "审核动作名称"
+    review_action_name: String
+    "审批人"
+    approver: String
+    "内网更新时间"
+    update_time_in: Time
+}
+
+"周期内违法数据"
+type CycleViolationData {
+    "扣分分值"
+    demerit_points: Float
+    "违法次数"
+    number_of_violation: Int
+    "罚款金额"
+    penalty: Float
+}
+
+"驾驶员近3个记分周期违法数据"
+type DriverThreeScoringCycleData{
+    "违章驾驶员信息"
+    driver_info: DriverInfo
+    "计分周期违法数据"
+    CycleViolationDataList: [CycleViolationData]
+}
+
+"车辆交通违法排名数据"
+type VehicleViolationRankData{
+    "车辆信息"
+    vehicle_info: VehicleInfo
+    "扣分信息"
+    deduction_info: CycleViolationData
+}
+
+"十大类违法种类数据"
+type TenTypeIllegalData{
+    type: String
+    number: Int
+}
+
+"县区的十大类违法种类数据"
+type DistrictTenTypeIllegalData{
+    "所在县区名称"
+    district_name: String
+    "十大类违法种类数据"
+    illegal_data: [TenTypeIllegalData]
+}
+"驾驶员酒驾毒驾违法统计数据"
+type DriverDrinkAndDrugData{
+    "违章驾驶员信息"
+    driver_info: DriverInfo
+    "十大类违法种类数据"
+    illegal_data: [TenTypeIllegalData]
+}
+
+"四大类重点车辆交通违法处理数据"
+type FourTypeKeyVehicleViolation {
+    "违法车辆总数"
+    total: Int
+    "已处理车辆数"
+    handle_number: Int
+    "未处理车辆数"
+    unhandled_number: Int
+    "违法处理率"
+    Illegal_handle_rate: Float
+}
+
+"四大类重点车辆交通违法清零数据"
+type FourTypeKeyVehicleViolationClear {
+    "所在县区名称"
+    district_name: String
+    handle_data: [FourTypeKeyVehicleViolation]
+}
+
+"企业百车违法率数据"
+type IllegalRateOfVehicle{
+    "企业名称"
+    enterprise_name: String
+    "所在县"
+    district_name: String
+    "企业地址"
+    enterprise_address: String
+    "总车辆数"
+    total_number_of_vehicle: Int
+    "违法车辆数"
+    number_of_illegal_vehicle: Int
+    "总违法数"
+    total_number_of_violations: Int
+    "已处理车辆数"
+    handle_number: Int
+    "未处理车辆数"
+    unhandled_number: Int
+    "违法处理率"
+    Illegal_handle_rate: Float
+}
+"单车违法数统计"
+type SingleCarIllegalStatistics{
+    "驾驶员信息"
+    driver_info: DriverInfo
+    "企业名称"
+    enterprise_name: String
+    "所在县"
+    district_name: String
+    "企业地址"
+    enterprise_address: String
+    "总车辆数"
+    total_number_of_vehicle: Int
+    "违法车辆数"
+    number_of_illegal_vehicle: Int
+    "总违法数"
+    total_number_of_violations: Int
+    "已处理车辆数"
+    handle_number: Int
+    "未处理车辆数"
+    unhandled_number: Int
+    "违法处理率"
+    Illegal_handle_rate: Float
+}
+
+"辖区内交通违法车辆数量的输入过滤"
+input DistrictVehicleViolationListFilter {
+    "违法类型"
+     illegal_type:String
+    "违法时间从"
+    illegalBetween: DateRange
+}
+
+"车辆违章明细记录的输入过滤"
+input VehicleViolationDetailListFilter {
+    "车牌号"
+    license_plate_number: String
+    "是否处理"
+    is_handle:Boolean
+    "违法代码"
+    illegal_code: String
+    "违法时间从"
+    illegalBetween: DateRange
+    "违法类型"
+    illegal_type:String
+    "处理状态"
+    handle_type: String
+    "经营范围"
+    business_scope: Int
+    "企业名称"
+    enterprise_name: String
+    "处理时间从"
+    handle_Between: DateRange
+}
+
+"辖区内车辆交通违法处置率统计的输入过滤"
+input DistrictVehicleViolationHandleListFilter {
+    "经营范围"
+    business_scope: Int
+    "违法时间从"
+    illegalBetween: DateRange
+}
+
+"驾驶员交通违法数据的输入过滤"
+input DriverViolationListFilter {
+    "驾驶员姓名"
+    driver_name: String
+    "企业名称"
+    enterprise_name: String
+    "违法代码"
+    illegal_code: String
+    "违法时间从"
+    illegalBetween: DateRange
+    "处理状态"
+    handle_type: String
+}
+
+"驾驶员近3个记分周期违法数据的输入过滤"
+input DriverThreeScoringCycleDataFilter {
+    "驾驶员姓名"
+    driver_name: String
+    "驾驶员身份验证信息ID"
+    driver_identity_id: String
+    "企业名称"
+    enterprise_name: String
+}
+
+"车辆交通违法排名数据的输入过滤"
+input VehicleViolationRankDataFilter {
+    "车牌号"
+    license_plate_number: String
+    "违法时间从"
+    registerBetween: DateRange
+    "企业名称"
+    enterprise_name: String
+}
+
+"十大类违法种类数据的输入过滤"
+input DistrictTenTypeIllegalDataFilter {
+    "经营范围"
+    business_scope: Int
+    "违法时间从"
+    illegalBetween: DateRange
+
+}
+"驾驶员酒驾毒驾违法统计数据的输入过滤"
+input DriverDrinkAndDrugDataFilter {
+    "车辆类型"
+    vehicle_type: Int
+    "违法时间从"
+    illegalBetween: DateRange
+}
+"四大类重点车辆交通违法清零数据的输入过滤"
+input FourTypeKeyVehicleViolationClearFilter {
+    "违法时间从"
+    illegalBetween: DateRange
+}
+"企业百车违法率数据的输入过滤"
+input IllegalRateOfVehicleFilter {
+    "违法时间从"
+    illegalBetween: DateRange
+    "企业性质"
+    enterprise_nature: String
+    "车辆类型"
+    vehicle_type: Int
+    "车辆总数大于"
+    VehicleNumberGreaterThan:Int
+    "违法未处理数大于"
+    IllegalNumberGreaterThan:Int
+    "所在县"
+    district: String
+}
+"单车违法数统计的输入过滤"
+input SingleCarIllegalStatisticsFilter {
+    "违法时间从"
+    illegalBetween: DateRange
+    "车牌号"
+    license_plate_number: String
+    "车辆类型"
+    vehicle_type: Int
+    "企业名称"
+    enterprise_name: String
+    "车辆总数大于"
+    VehicleNumberGreaterThan:Int
+    "违法未处理数大于"
+    IllegalNumberGreaterThan:Int
+}
+
+"监管短信日志查询的输入过滤"
+input SmsRemindLogFilter {
+    "登记时间时间从"
+    registerBetween: DateRange
+    "手机号码"
+    telephone: String
+    "车辆类型"
+    vehicle_type: Int
+    "短信内容"
+    text_content: String
+    "所在县"
+    district: String
+    "企业名称"
+    enterprise_name: String
+    "驾驶员姓名"
+    driver_name: String
+    "车牌号"
+    license_plate_number: String
+}
+
+extend type Query {
+    "获取辖区内交通违法车辆数量"
+    getDistrictVehicleViolationList(
+        filter: DistrictVehicleViolationListFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [DistrictCount!]!
+    "获取车辆违章明细记录"
+    getVehicleViolationDetailList(
+        filter: VehicleViolationDetailListFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [VehicleViolationDetails!]!
+    "获取辖区内车辆交通违法处置率统计"
+    getDistrictVehicleViolationHandleList(
+        filter: DistrictVehicleViolationHandleListFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [DistrictCount!]!
+    "获取驾驶员交通违法数据"
+    getDriverViolationList(
+        filter: DriverViolationListFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [VehicleViolationDetails!]!
+    "获取驾驶员近3个记分周期违法数据"
+    getDriverThreeScoringCycleData(
+        filter: DriverThreeScoringCycleDataFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [DriverThreeScoringCycleData!]!
+    "获取车辆交通违法排名数据"
+    getVehicleViolationRankData(
+        filter: VehicleViolationRankDataFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [VehicleViolationRankData!]!
+    "获取十大类违法种类数据"
+    getDistrictTenTypeIllegalData(
+        filter: DistrictTenTypeIllegalDataFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [DistrictTenTypeIllegalData!]!
+    "获取驾驶员酒驾毒驾违法统计数据"
+    getDriverDrinkAndDrugData(
+        filter: DriverDrinkAndDrugDataFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [DriverDrinkAndDrugData!]!
+    "获取四大类重点车辆交通违法清零数据"
+    getFourTypeKeyVehicleViolationClear(
+        filter: FourTypeKeyVehicleViolationClearFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [FourTypeKeyVehicleViolationClear!]!
+    "获取企业百车违法率数据"
+    getIllegalRateOfVehicle(
+        filter: IllegalRateOfVehicleFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [IllegalRateOfVehicle!]!
+    "获取单车违法数统计"
+    getSingleCarIllegalStatistics(
+        filter: SingleCarIllegalStatisticsFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [SingleCarIllegalStatistics!]!
+    "查询监管短信日志"
+    getSmsRemindLog(
+        filter: SmsRemindLogFilter,
+        paging: DataPage
+        sorting: SortDirection = DESCENDING
+    ): [SmsRemindLog!]!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -2118,7 +4894,7 @@ func (ec *executionContext) field_Mutation_createDriverInfo_args(ctx context.Con
 	var arg0 model.NewDriverInfo
 	if tmp, ok := rawArgs["req"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("req"))
-		arg0, err = ec.unmarshalNNewDriverInfo2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewDriverInfo(ctx, tmp)
+		arg0, err = ec.unmarshalNNewDriverInfo2keyVehicleSupervisionᚋgraphᚋmodelᚐNewDriverInfo(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2133,7 +4909,7 @@ func (ec *executionContext) field_Mutation_createVehicleDriverBinding_args(ctx c
 	var arg0 model.NewVehicleDriverBinding
 	if tmp, ok := rawArgs["req"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("req"))
-		arg0, err = ec.unmarshalNNewVehicleDriverBinding2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleDriverBinding(ctx, tmp)
+		arg0, err = ec.unmarshalNNewVehicleDriverBinding2keyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleDriverBinding(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2148,7 +4924,7 @@ func (ec *executionContext) field_Mutation_createVehicleInfo_args(ctx context.Co
 	var arg0 model.NewVehicleInfo
 	if tmp, ok := rawArgs["req"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("req"))
-		arg0, err = ec.unmarshalNNewVehicleInfo2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleInfo(ctx, tmp)
+		arg0, err = ec.unmarshalNNewVehicleInfo2keyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleInfo(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2160,45 +4936,45 @@ func (ec *executionContext) field_Mutation_createVehicleInfo_args(ctx context.Co
 func (ec *executionContext) field_Mutation_deleteDriverInfo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.NewDriverInfo
-	if tmp, ok := rawArgs["req"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("req"))
-		arg0, err = ec.unmarshalNNewDriverInfo2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewDriverInfo(ctx, tmp)
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["req"] = arg0
+	args["id"] = arg0
 	return args, nil
 }
 
 func (ec *executionContext) field_Mutation_deleteVehicleDriverBinding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.NewVehicleDriverBinding
-	if tmp, ok := rawArgs["req"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("req"))
-		arg0, err = ec.unmarshalNNewVehicleDriverBinding2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleDriverBinding(ctx, tmp)
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["req"] = arg0
+	args["id"] = arg0
 	return args, nil
 }
 
 func (ec *executionContext) field_Mutation_deleteVehicleInfo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.NewVehicleInfo
-	if tmp, ok := rawArgs["req"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("req"))
-		arg0, err = ec.unmarshalNNewVehicleInfo2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleInfo(ctx, tmp)
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["req"] = arg0
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -2208,7 +4984,7 @@ func (ec *executionContext) field_Mutation_updateDriverInfo_args(ctx context.Con
 	var arg0 model.NewDriverInfo
 	if tmp, ok := rawArgs["req"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("req"))
-		arg0, err = ec.unmarshalNNewDriverInfo2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewDriverInfo(ctx, tmp)
+		arg0, err = ec.unmarshalNNewDriverInfo2keyVehicleSupervisionᚋgraphᚋmodelᚐNewDriverInfo(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2223,7 +4999,7 @@ func (ec *executionContext) field_Mutation_updateVehicleDriverBinding_args(ctx c
 	var arg0 model.NewVehicleDriverBinding
 	if tmp, ok := rawArgs["req"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("req"))
-		arg0, err = ec.unmarshalNNewVehicleDriverBinding2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleDriverBinding(ctx, tmp)
+		arg0, err = ec.unmarshalNNewVehicleDriverBinding2keyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleDriverBinding(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2238,7 +5014,7 @@ func (ec *executionContext) field_Mutation_updateVehicleInfo_args(ctx context.Co
 	var arg0 model.NewVehicleInfo
 	if tmp, ok := rawArgs["req"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("req"))
-		arg0, err = ec.unmarshalNNewVehicleInfo2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleInfo(ctx, tmp)
+		arg0, err = ec.unmarshalNNewVehicleInfo2keyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleInfo(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2268,7 +5044,7 @@ func (ec *executionContext) field_Query_getDistrictDriverList_args(ctx context.C
 	var arg0 *model.DataPage
 	if tmp, ok := rawArgs["paging"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
-		arg0, err = ec.unmarshalODataPage2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		arg0, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2277,12 +5053,45 @@ func (ec *executionContext) field_Query_getDistrictDriverList_args(ctx context.C
 	var arg1 *model.SortDirection
 	if tmp, ok := rawArgs["sorting"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
-		arg1, err = ec.unmarshalOSortDirection2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		arg1, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["sorting"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getDistrictTenTypeIllegalData_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.DistrictTenTypeIllegalDataFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalODistrictTenTypeIllegalDataFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictTenTypeIllegalDataFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
 	return args, nil
 }
 
@@ -2292,7 +5101,7 @@ func (ec *executionContext) field_Query_getDistrictVehicleList_args(ctx context.
 	var arg0 *model.DataPage
 	if tmp, ok := rawArgs["paging"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
-		arg0, err = ec.unmarshalODataPage2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		arg0, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2301,12 +5110,111 @@ func (ec *executionContext) field_Query_getDistrictVehicleList_args(ctx context.
 	var arg1 *model.SortDirection
 	if tmp, ok := rawArgs["sorting"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
-		arg1, err = ec.unmarshalOSortDirection2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		arg1, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["sorting"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getDistrictVehicleViolationHandleList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.DistrictVehicleViolationHandleListFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalODistrictVehicleViolationHandleListFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictVehicleViolationHandleListFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getDistrictVehicleViolationList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.DistrictVehicleViolationListFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalODistrictVehicleViolationListFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictVehicleViolationListFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getDriverDrinkAndDrugData_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.DriverDrinkAndDrugDataFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalODriverDrinkAndDrugDataFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverDrinkAndDrugDataFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
 	return args, nil
 }
 
@@ -2316,7 +5224,7 @@ func (ec *executionContext) field_Query_getDriverInfoList_args(ctx context.Conte
 	var arg0 *model.DriverInfoFilter
 	if tmp, ok := rawArgs["filter"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg0, err = ec.unmarshalODriverInfoFilter2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfoFilter(ctx, tmp)
+		arg0, err = ec.unmarshalODriverInfoFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfoFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2325,7 +5233,7 @@ func (ec *executionContext) field_Query_getDriverInfoList_args(ctx context.Conte
 	var arg1 *model.DataPage
 	if tmp, ok := rawArgs["paging"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
-		arg1, err = ec.unmarshalODataPage2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2334,7 +5242,7 @@ func (ec *executionContext) field_Query_getDriverInfoList_args(ctx context.Conte
 	var arg2 *model.DriverDataSort
 	if tmp, ok := rawArgs["sorting"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
-		arg2, err = ec.unmarshalODriverDataSort2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverDataSort(ctx, tmp)
+		arg2, err = ec.unmarshalODriverDataSort2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverDataSort(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2343,13 +5251,13 @@ func (ec *executionContext) field_Query_getDriverInfoList_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getVehicleDriverBinding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_getDriverThreeScoringCycleData_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.DriverInfoFilter
+	var arg0 *model.DriverThreeScoringCycleDataFilter
 	if tmp, ok := rawArgs["filter"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg0, err = ec.unmarshalODriverInfoFilter2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfoFilter(ctx, tmp)
+		arg0, err = ec.unmarshalODriverThreeScoringCycleDataFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverThreeScoringCycleDataFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2358,16 +5266,238 @@ func (ec *executionContext) field_Query_getVehicleDriverBinding_args(ctx context
 	var arg1 *model.DataPage
 	if tmp, ok := rawArgs["paging"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
-		arg1, err = ec.unmarshalODataPage2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["paging"] = arg1
-	var arg2 *model.DriverDataSort
+	var arg2 *model.SortDirection
 	if tmp, ok := rawArgs["sorting"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
-		arg2, err = ec.unmarshalODriverDataSort2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverDataSort(ctx, tmp)
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getDriverViolationList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.DriverViolationListFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalODriverViolationListFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverViolationListFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getFourTypeKeyVehicleViolationClear_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.FourTypeKeyVehicleViolationClearFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalOFourTypeKeyVehicleViolationClearFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐFourTypeKeyVehicleViolationClearFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getIllegalRateOfVehicle_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.IllegalRateOfVehicleFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalOIllegalRateOfVehicleFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐIllegalRateOfVehicleFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getSingleCarIllegalStatistics_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.SingleCarIllegalStatisticsFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalOSingleCarIllegalStatisticsFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSingleCarIllegalStatisticsFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getSmsRemindLog_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.SmsRemindLogFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalOSmsRemindLogFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSmsRemindLogFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getVehicleAlarmDataList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg0, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg0
+	var arg1 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg1, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getVehicleDriverBinding_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.VehicleDriverBindingFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalOVehicleDriverBindingFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBindingFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.VehicleDriverBindingDataSort
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOVehicleDriverBindingDataSort2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBindingDataSort(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2382,7 +5512,7 @@ func (ec *executionContext) field_Query_getVehicleInfoList_args(ctx context.Cont
 	var arg0 *model.VehicleInfoFilter
 	if tmp, ok := rawArgs["filter"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg0, err = ec.unmarshalOVehicleInfoFilter2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfoFilter(ctx, tmp)
+		arg0, err = ec.unmarshalOVehicleInfoFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfoFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2391,7 +5521,7 @@ func (ec *executionContext) field_Query_getVehicleInfoList_args(ctx context.Cont
 	var arg1 *model.DataPage
 	if tmp, ok := rawArgs["paging"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
-		arg1, err = ec.unmarshalODataPage2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2400,12 +5530,93 @@ func (ec *executionContext) field_Query_getVehicleInfoList_args(ctx context.Cont
 	var arg2 *model.VehicleDataSort
 	if tmp, ok := rawArgs["sorting"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
-		arg2, err = ec.unmarshalOVehicleDataSort2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDataSort(ctx, tmp)
+		arg2, err = ec.unmarshalOVehicleDataSort2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDataSort(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["sorting"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getVehicleViolationDetailList_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.VehicleViolationDetailListFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalOVehicleViolationDetailListFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationDetailListFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getVehicleViolationRankData_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.VehicleViolationRankDataFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalOVehicleViolationRankDataFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationRankDataFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
+	var arg1 *model.DataPage
+	if tmp, ok := rawArgs["paging"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("paging"))
+		arg1, err = ec.unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["paging"] = arg1
+	var arg2 *model.SortDirection
+	if tmp, ok := rawArgs["sorting"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sorting"))
+		arg2, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["sorting"] = arg2
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_newVehicleAlarmData_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.AlarmType
+	if tmp, ok := rawArgs["type"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+		arg0, err = ec.unmarshalOAlarmType2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐAlarmType(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["type"] = arg0
 	return args, nil
 }
 
@@ -2511,6 +5722,1342 @@ func (ec *executionContext) _BusinessScopeInfo_number(ctx context.Context, field
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _CycleViolationData_demerit_points(ctx context.Context, field graphql.CollectedField, obj *model.CycleViolationData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CycleViolationData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DemeritPoints, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CycleViolationData_number_of_violation(ctx context.Context, field graphql.CollectedField, obj *model.CycleViolationData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CycleViolationData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NumberOfViolation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _CycleViolationData_penalty(ctx context.Context, field graphql.CollectedField, obj *model.CycleViolationData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "CycleViolationData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Penalty, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_id(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_dispute_violation_id(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisputeViolationID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_violation_detail(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ViolationDetail, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VehicleViolationDetails)
+	fc.Result = res
+	return ec.marshalOVehicleViolationDetails2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationDetails(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_written_application_materials(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.WrittenApplicationMaterials, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_labor_contract(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LaborContract, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_driving_log(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DrivingLog, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_witness(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Witness, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_statement(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Statement, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_pic_evidence(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PicEvidence, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_driver_license(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DriverLicense, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_driving_license(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DrivingLicense, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_id_card(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IDCard, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_business_license(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BusinessLicense, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_organization_code(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.OrganizationCode, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_legal_person_id_number(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LegalPersonIDNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_agent_id_number(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AgentIDNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_vehicle_manager_id_card(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VehicleManagerIDCard, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_other_evidence(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.OtherEvidence, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*string)
+	fc.Result = res
+	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_approve_state(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ApproveState, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_update_time_in(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateTimeIn, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_contact_address(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ContactAddress, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_is_delete(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsDelete, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_create_at(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_create_by(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_update_at(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_update_by(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_delete_at(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecord_delete_by(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecordLog_id(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecordLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecordLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecordLog_dispute_violation_log_id(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecordLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecordLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisputeViolationLogID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecordLog_dispute_violation_data(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecordLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecordLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisputeViolationData, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DisputeViolationRecord)
+	fc.Result = res
+	return ec.marshalODisputeViolationRecord2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDisputeViolationRecord(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecordLog_reviewer(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecordLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecordLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reviewer, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecordLog_review_time(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecordLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecordLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReviewTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecordLog_review_opinion(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecordLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecordLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReviewOpinion, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecordLog_review_result(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecordLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecordLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReviewResult, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecordLog_review_action_name(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecordLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecordLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReviewActionName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecordLog_approver(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecordLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecordLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Approver, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DisputeViolationRecordLog_update_time_in(ctx context.Context, field graphql.CollectedField, obj *model.DisputeViolationRecordLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DisputeViolationRecordLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateTimeIn, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _DistrictCount_district_name(ctx context.Context, field graphql.CollectedField, obj *model.DistrictCount) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2578,7 +7125,135 @@ func (ec *executionContext) _DistrictCount_business_scope_info_list(ctx context.
 	}
 	res := resTmp.([]*model.BusinessScopeInfo)
 	fc.Result = res
-	return ec.marshalNBusinessScopeInfo2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐBusinessScopeInfoᚄ(ctx, field.Selections, res)
+	return ec.marshalNBusinessScopeInfo2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐBusinessScopeInfoᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DistrictTenTypeIllegalData_district_name(ctx context.Context, field graphql.CollectedField, obj *model.DistrictTenTypeIllegalData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DistrictTenTypeIllegalData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DistrictName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DistrictTenTypeIllegalData_illegal_data(ctx context.Context, field graphql.CollectedField, obj *model.DistrictTenTypeIllegalData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DistrictTenTypeIllegalData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalData, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.TenTypeIllegalData)
+	fc.Result = res
+	return ec.marshalOTenTypeIllegalData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐTenTypeIllegalData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DriverDrinkAndDrugData_driver_info(ctx context.Context, field graphql.CollectedField, obj *model.DriverDrinkAndDrugData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DriverDrinkAndDrugData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DriverInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DriverInfo)
+	fc.Result = res
+	return ec.marshalODriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DriverDrinkAndDrugData_illegal_data(ctx context.Context, field graphql.CollectedField, obj *model.DriverDrinkAndDrugData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DriverDrinkAndDrugData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalData, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.TenTypeIllegalData)
+	fc.Result = res
+	return ec.marshalOTenTypeIllegalData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐTenTypeIllegalData(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _DriverIdentity_identity_id(ctx context.Context, field graphql.CollectedField, obj *model.DriverIdentity) (ret graphql.Marshaler) {
@@ -3876,7 +8551,7 @@ func (ec *executionContext) _DriverInfo_driver_identity(ctx context.Context, fie
 	}
 	res := resTmp.(*model.DriverIdentity)
 	fc.Result = res
-	return ec.marshalODriverIdentity2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverIdentity(ctx, field.Selections, res)
+	return ec.marshalODriverIdentity2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverIdentity(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _DriverInfo_driver_name(ctx context.Context, field graphql.CollectedField, obj *model.DriverInfo) (ret graphql.Marshaler) {
@@ -4822,6 +9497,550 @@ func (ec *executionContext) _DriverInfo_remarks(ctx context.Context, field graph
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _DriverThreeScoringCycleData_driver_info(ctx context.Context, field graphql.CollectedField, obj *model.DriverThreeScoringCycleData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DriverThreeScoringCycleData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DriverInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DriverInfo)
+	fc.Result = res
+	return ec.marshalODriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _DriverThreeScoringCycleData_CycleViolationDataList(ctx context.Context, field graphql.CollectedField, obj *model.DriverThreeScoringCycleData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "DriverThreeScoringCycleData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CycleViolationDataList, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CycleViolationData)
+	fc.Result = res
+	return ec.marshalOCycleViolationData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐCycleViolationData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FourTypeKeyVehicleViolation_total(ctx context.Context, field graphql.CollectedField, obj *model.FourTypeKeyVehicleViolation) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FourTypeKeyVehicleViolation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Total, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FourTypeKeyVehicleViolation_handle_number(ctx context.Context, field graphql.CollectedField, obj *model.FourTypeKeyVehicleViolation) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FourTypeKeyVehicleViolation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HandleNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FourTypeKeyVehicleViolation_unhandled_number(ctx context.Context, field graphql.CollectedField, obj *model.FourTypeKeyVehicleViolation) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FourTypeKeyVehicleViolation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UnhandledNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FourTypeKeyVehicleViolation_Illegal_handle_rate(ctx context.Context, field graphql.CollectedField, obj *model.FourTypeKeyVehicleViolation) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FourTypeKeyVehicleViolation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalHandleRate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FourTypeKeyVehicleViolationClear_district_name(ctx context.Context, field graphql.CollectedField, obj *model.FourTypeKeyVehicleViolationClear) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FourTypeKeyVehicleViolationClear",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DistrictName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _FourTypeKeyVehicleViolationClear_handle_data(ctx context.Context, field graphql.CollectedField, obj *model.FourTypeKeyVehicleViolationClear) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "FourTypeKeyVehicleViolationClear",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HandleData, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.FourTypeKeyVehicleViolation)
+	fc.Result = res
+	return ec.marshalOFourTypeKeyVehicleViolation2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐFourTypeKeyVehicleViolation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IllegalRateOfVehicle_enterprise_name(ctx context.Context, field graphql.CollectedField, obj *model.IllegalRateOfVehicle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IllegalRateOfVehicle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EnterpriseName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IllegalRateOfVehicle_district_name(ctx context.Context, field graphql.CollectedField, obj *model.IllegalRateOfVehicle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IllegalRateOfVehicle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DistrictName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IllegalRateOfVehicle_enterprise_address(ctx context.Context, field graphql.CollectedField, obj *model.IllegalRateOfVehicle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IllegalRateOfVehicle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EnterpriseAddress, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IllegalRateOfVehicle_total_number_of_vehicle(ctx context.Context, field graphql.CollectedField, obj *model.IllegalRateOfVehicle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IllegalRateOfVehicle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalNumberOfVehicle, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IllegalRateOfVehicle_number_of_illegal_vehicle(ctx context.Context, field graphql.CollectedField, obj *model.IllegalRateOfVehicle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IllegalRateOfVehicle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NumberOfIllegalVehicle, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IllegalRateOfVehicle_total_number_of_violations(ctx context.Context, field graphql.CollectedField, obj *model.IllegalRateOfVehicle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IllegalRateOfVehicle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalNumberOfViolations, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IllegalRateOfVehicle_handle_number(ctx context.Context, field graphql.CollectedField, obj *model.IllegalRateOfVehicle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IllegalRateOfVehicle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HandleNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IllegalRateOfVehicle_unhandled_number(ctx context.Context, field graphql.CollectedField, obj *model.IllegalRateOfVehicle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IllegalRateOfVehicle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UnhandledNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _IllegalRateOfVehicle_Illegal_handle_rate(ctx context.Context, field graphql.CollectedField, obj *model.IllegalRateOfVehicle) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "IllegalRateOfVehicle",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalHandleRate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createVehicleInfo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4861,7 +10080,7 @@ func (ec *executionContext) _Mutation_createVehicleInfo(ctx context.Context, fie
 	}
 	res := resTmp.(*model.VehicleInfo)
 	fc.Result = res
-	return ec.marshalNVehicleInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx, field.Selections, res)
+	return ec.marshalNVehicleInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateVehicleInfo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4903,7 +10122,7 @@ func (ec *executionContext) _Mutation_updateVehicleInfo(ctx context.Context, fie
 	}
 	res := resTmp.(*model.VehicleInfo)
 	fc.Result = res
-	return ec.marshalNVehicleInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx, field.Selections, res)
+	return ec.marshalNVehicleInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteVehicleInfo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4931,7 +10150,7 @@ func (ec *executionContext) _Mutation_deleteVehicleInfo(ctx context.Context, fie
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteVehicleInfo(rctx, args["req"].(model.NewVehicleInfo))
+		return ec.resolvers.Mutation().DeleteVehicleInfo(rctx, args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4945,7 +10164,7 @@ func (ec *executionContext) _Mutation_deleteVehicleInfo(ctx context.Context, fie
 	}
 	res := resTmp.(*model.VehicleInfo)
 	fc.Result = res
-	return ec.marshalNVehicleInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx, field.Selections, res)
+	return ec.marshalNVehicleInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createDriverInfo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4987,7 +10206,7 @@ func (ec *executionContext) _Mutation_createDriverInfo(ctx context.Context, fiel
 	}
 	res := resTmp.(*model.DriverInfo)
 	fc.Result = res
-	return ec.marshalNDriverInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
+	return ec.marshalNDriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateDriverInfo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5029,7 +10248,7 @@ func (ec *executionContext) _Mutation_updateDriverInfo(ctx context.Context, fiel
 	}
 	res := resTmp.(*model.DriverInfo)
 	fc.Result = res
-	return ec.marshalNDriverInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
+	return ec.marshalNDriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteDriverInfo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5057,7 +10276,7 @@ func (ec *executionContext) _Mutation_deleteDriverInfo(ctx context.Context, fiel
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteDriverInfo(rctx, args["req"].(model.NewDriverInfo))
+		return ec.resolvers.Mutation().DeleteDriverInfo(rctx, args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5071,7 +10290,7 @@ func (ec *executionContext) _Mutation_deleteDriverInfo(ctx context.Context, fiel
 	}
 	res := resTmp.(*model.DriverInfo)
 	fc.Result = res
-	return ec.marshalNDriverInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
+	return ec.marshalNDriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createVehicleDriverBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5113,7 +10332,7 @@ func (ec *executionContext) _Mutation_createVehicleDriverBinding(ctx context.Con
 	}
 	res := resTmp.(*model.VehicleDriverBinding)
 	fc.Result = res
-	return ec.marshalNVehicleDriverBinding2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx, field.Selections, res)
+	return ec.marshalNVehicleDriverBinding2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateVehicleDriverBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5155,7 +10374,7 @@ func (ec *executionContext) _Mutation_updateVehicleDriverBinding(ctx context.Con
 	}
 	res := resTmp.(*model.VehicleDriverBinding)
 	fc.Result = res
-	return ec.marshalNVehicleDriverBinding2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx, field.Selections, res)
+	return ec.marshalNVehicleDriverBinding2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_deleteVehicleDriverBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5183,7 +10402,7 @@ func (ec *executionContext) _Mutation_deleteVehicleDriverBinding(ctx context.Con
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteVehicleDriverBinding(rctx, args["req"].(model.NewVehicleDriverBinding))
+		return ec.resolvers.Mutation().DeleteVehicleDriverBinding(rctx, args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5197,7 +10416,77 @@ func (ec *executionContext) _Mutation_deleteVehicleDriverBinding(ctx context.Con
 	}
 	res := resTmp.(*model.VehicleDriverBinding)
 	fc.Result = res
-	return ec.marshalNVehicleDriverBinding2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx, field.Selections, res)
+	return ec.marshalNVehicleDriverBinding2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Point_longitude(ctx context.Context, field graphql.CollectedField, obj *model.Point) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Point",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Longitude, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Point_latitude(ctx context.Context, field graphql.CollectedField, obj *model.Point) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Point",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Latitude, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getDistrictVehicleList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5239,7 +10528,7 @@ func (ec *executionContext) _Query_getDistrictVehicleList(ctx context.Context, f
 	}
 	res := resTmp.([]*model.DistrictCount)
 	fc.Result = res
-	return ec.marshalNDistrictCount2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCountᚄ(ctx, field.Selections, res)
+	return ec.marshalNDistrictCount2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCountᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getVehicleInfoList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5281,7 +10570,49 @@ func (ec *executionContext) _Query_getVehicleInfoList(ctx context.Context, field
 	}
 	res := resTmp.([]*model.VehicleInfo)
 	fc.Result = res
-	return ec.marshalNVehicleInfo2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfoᚄ(ctx, field.Selections, res)
+	return ec.marshalNVehicleInfo2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfoᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getVehicleAlarmDataList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getVehicleAlarmDataList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetVehicleAlarmDataList(rctx, args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.VehicleAlarmData)
+	fc.Result = res
+	return ec.marshalNVehicleAlarmData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleAlarmDataᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getDistrictDriverList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5323,7 +10654,7 @@ func (ec *executionContext) _Query_getDistrictDriverList(ctx context.Context, fi
 	}
 	res := resTmp.([]*model.DistrictCount)
 	fc.Result = res
-	return ec.marshalNDistrictCount2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCountᚄ(ctx, field.Selections, res)
+	return ec.marshalNDistrictCount2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCountᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getDriverInfoList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5365,7 +10696,7 @@ func (ec *executionContext) _Query_getDriverInfoList(ctx context.Context, field 
 	}
 	res := resTmp.([]*model.DriverInfo)
 	fc.Result = res
-	return ec.marshalNDriverInfo2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfoᚄ(ctx, field.Selections, res)
+	return ec.marshalNDriverInfo2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfoᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getVehicleDriverBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5393,7 +10724,7 @@ func (ec *executionContext) _Query_getVehicleDriverBinding(ctx context.Context, 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetVehicleDriverBinding(rctx, args["filter"].(*model.DriverInfoFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.DriverDataSort))
+		return ec.resolvers.Query().GetVehicleDriverBinding(rctx, args["filter"].(*model.VehicleDriverBindingFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.VehicleDriverBindingDataSort))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5407,7 +10738,511 @@ func (ec *executionContext) _Query_getVehicleDriverBinding(ctx context.Context, 
 	}
 	res := resTmp.([]*model.VehicleDriverBinding)
 	fc.Result = res
-	return ec.marshalNVehicleDriverBinding2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBindingᚄ(ctx, field.Selections, res)
+	return ec.marshalNVehicleDriverBinding2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBindingᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getDistrictVehicleViolationList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getDistrictVehicleViolationList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetDistrictVehicleViolationList(rctx, args["filter"].(*model.DistrictVehicleViolationListFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.DistrictCount)
+	fc.Result = res
+	return ec.marshalNDistrictCount2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCountᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getVehicleViolationDetailList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getVehicleViolationDetailList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetVehicleViolationDetailList(rctx, args["filter"].(*model.VehicleViolationDetailListFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.VehicleViolationDetails)
+	fc.Result = res
+	return ec.marshalNVehicleViolationDetails2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationDetailsᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getDistrictVehicleViolationHandleList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getDistrictVehicleViolationHandleList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetDistrictVehicleViolationHandleList(rctx, args["filter"].(*model.DistrictVehicleViolationHandleListFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.DistrictCount)
+	fc.Result = res
+	return ec.marshalNDistrictCount2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCountᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getDriverViolationList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getDriverViolationList_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetDriverViolationList(rctx, args["filter"].(*model.DriverViolationListFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.VehicleViolationDetails)
+	fc.Result = res
+	return ec.marshalNVehicleViolationDetails2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationDetailsᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getDriverThreeScoringCycleData(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getDriverThreeScoringCycleData_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetDriverThreeScoringCycleData(rctx, args["filter"].(*model.DriverThreeScoringCycleDataFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.DriverThreeScoringCycleData)
+	fc.Result = res
+	return ec.marshalNDriverThreeScoringCycleData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverThreeScoringCycleDataᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getVehicleViolationRankData(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getVehicleViolationRankData_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetVehicleViolationRankData(rctx, args["filter"].(*model.VehicleViolationRankDataFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.VehicleViolationRankData)
+	fc.Result = res
+	return ec.marshalNVehicleViolationRankData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationRankDataᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getDistrictTenTypeIllegalData(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getDistrictTenTypeIllegalData_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetDistrictTenTypeIllegalData(rctx, args["filter"].(*model.DistrictTenTypeIllegalDataFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.DistrictTenTypeIllegalData)
+	fc.Result = res
+	return ec.marshalNDistrictTenTypeIllegalData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictTenTypeIllegalDataᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getDriverDrinkAndDrugData(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getDriverDrinkAndDrugData_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetDriverDrinkAndDrugData(rctx, args["filter"].(*model.DriverDrinkAndDrugDataFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.DriverDrinkAndDrugData)
+	fc.Result = res
+	return ec.marshalNDriverDrinkAndDrugData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverDrinkAndDrugDataᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getFourTypeKeyVehicleViolationClear(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getFourTypeKeyVehicleViolationClear_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetFourTypeKeyVehicleViolationClear(rctx, args["filter"].(*model.FourTypeKeyVehicleViolationClearFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.FourTypeKeyVehicleViolationClear)
+	fc.Result = res
+	return ec.marshalNFourTypeKeyVehicleViolationClear2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐFourTypeKeyVehicleViolationClearᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getIllegalRateOfVehicle(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getIllegalRateOfVehicle_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetIllegalRateOfVehicle(rctx, args["filter"].(*model.IllegalRateOfVehicleFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.IllegalRateOfVehicle)
+	fc.Result = res
+	return ec.marshalNIllegalRateOfVehicle2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐIllegalRateOfVehicleᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getSingleCarIllegalStatistics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getSingleCarIllegalStatistics_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSingleCarIllegalStatistics(rctx, args["filter"].(*model.SingleCarIllegalStatisticsFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.SingleCarIllegalStatistics)
+	fc.Result = res
+	return ec.marshalNSingleCarIllegalStatistics2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSingleCarIllegalStatisticsᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getSmsRemindLog(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getSmsRemindLog_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetSmsRemindLog(rctx, args["filter"].(*model.SmsRemindLogFilter), args["paging"].(*model.DataPage), args["sorting"].(*model.SortDirection))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.SmsRemindLog)
+	fc.Result = res
+	return ec.marshalNSmsRemindLog2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSmsRemindLogᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5479,6 +11314,2286 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_id(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_regional_violation_register_id(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RegionalViolationRegisterID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_violation_detail(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ViolationDetail, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VehicleViolationDetails)
+	fc.Result = res
+	return ec.marshalOVehicleViolationDetails2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationDetails(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_vehicle_info(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VehicleInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VehicleInfo)
+	fc.Result = res
+	return ec.marshalOVehicleInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_driver_info(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DriverInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DriverInfo)
+	fc.Result = res
+	return ec.marshalODriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_illegal_data(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalData, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VioCodewfdm)
+	fc.Result = res
+	return ec.marshalOVIO_CODEWFDM2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVioCodewfdm(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_illegal_time(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_illegal_type(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_register_time(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RegisterTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_processing_agency(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ProcessingAgency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_operator(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Operator, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_is_register(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsRegister, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_is_delete(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsDelete, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_create_at(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_create_by(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_update_at(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_update_by(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_delete_at(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RegionalViolationRegister_delete_by(ctx context.Context, field graphql.CollectedField, obj *model.RegionalViolationRegister) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RegionalViolationRegister",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SingleCarIllegalStatistics_driver_info(ctx context.Context, field graphql.CollectedField, obj *model.SingleCarIllegalStatistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SingleCarIllegalStatistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DriverInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DriverInfo)
+	fc.Result = res
+	return ec.marshalODriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SingleCarIllegalStatistics_enterprise_name(ctx context.Context, field graphql.CollectedField, obj *model.SingleCarIllegalStatistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SingleCarIllegalStatistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EnterpriseName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SingleCarIllegalStatistics_district_name(ctx context.Context, field graphql.CollectedField, obj *model.SingleCarIllegalStatistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SingleCarIllegalStatistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DistrictName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SingleCarIllegalStatistics_enterprise_address(ctx context.Context, field graphql.CollectedField, obj *model.SingleCarIllegalStatistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SingleCarIllegalStatistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EnterpriseAddress, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SingleCarIllegalStatistics_total_number_of_vehicle(ctx context.Context, field graphql.CollectedField, obj *model.SingleCarIllegalStatistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SingleCarIllegalStatistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalNumberOfVehicle, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SingleCarIllegalStatistics_number_of_illegal_vehicle(ctx context.Context, field graphql.CollectedField, obj *model.SingleCarIllegalStatistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SingleCarIllegalStatistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NumberOfIllegalVehicle, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SingleCarIllegalStatistics_total_number_of_violations(ctx context.Context, field graphql.CollectedField, obj *model.SingleCarIllegalStatistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SingleCarIllegalStatistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalNumberOfViolations, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SingleCarIllegalStatistics_handle_number(ctx context.Context, field graphql.CollectedField, obj *model.SingleCarIllegalStatistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SingleCarIllegalStatistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HandleNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SingleCarIllegalStatistics_unhandled_number(ctx context.Context, field graphql.CollectedField, obj *model.SingleCarIllegalStatistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SingleCarIllegalStatistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UnhandledNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SingleCarIllegalStatistics_Illegal_handle_rate(ctx context.Context, field graphql.CollectedField, obj *model.SingleCarIllegalStatistics) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SingleCarIllegalStatistics",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalHandleRate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_id(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_sms_log_id(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SmsLogID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_driver_info(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DriverInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DriverInfo)
+	fc.Result = res
+	return ec.marshalODriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_cellphone_number(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CellphoneNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_sms_content(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SmsContent, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_is_send(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsSend, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_sms_type(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SmsType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_is_delete(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsDelete, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_create_at(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_create_by(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_update_at(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_update_by(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_delete_at(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SmsRemindLog_delete_by(ctx context.Context, field graphql.CollectedField, obj *model.SmsRemindLog) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SmsRemindLog",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Subscription_newVehicleAlarmData(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_newVehicleAlarmData_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().NewVehicleAlarmData(rctx, args["type"].(*model.AlarmType))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan *model.VehicleAlarmData)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNVehicleAlarmData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleAlarmData(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
+func (ec *executionContext) _TenTypeIllegalData_type(ctx context.Context, field graphql.CollectedField, obj *model.TenTypeIllegalData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TenTypeIllegalData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _TenTypeIllegalData_number(ctx context.Context, field graphql.CollectedField, obj *model.TenTypeIllegalData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "TenTypeIllegalData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Number, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VIO_CODEWFDM_WFXW(ctx context.Context, field graphql.CollectedField, obj *model.VioCodewfdm) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VIO_CODEWFDM",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Wfxw, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VIO_CODEWFDM_WFMS(ctx context.Context, field graphql.CollectedField, obj *model.VioCodewfdm) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VIO_CODEWFDM",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Wfms, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VIO_CODEWFDM_WFJFS(ctx context.Context, field graphql.CollectedField, obj *model.VioCodewfdm) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VIO_CODEWFDM",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Wfjfs, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VIO_CODEWFDM_FKJE_MIN(ctx context.Context, field graphql.CollectedField, obj *model.VioCodewfdm) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VIO_CODEWFDM",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FkjeMin, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VIO_CODEWFDM_FKJE_MAX(ctx context.Context, field graphql.CollectedField, obj *model.VioCodewfdm) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VIO_CODEWFDM",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FkjeMax, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VIO_CODEWFDM_XH(ctx context.Context, field graphql.CollectedField, obj *model.VioCodewfdm) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VIO_CODEWFDM",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Xh, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_alarm_data_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AlarmDataID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_vehicle_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VehicleID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_pid(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pid, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_speed(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Speed, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_record_time(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RecordTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_pos_desc(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PosDesc, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_coordinate(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Coordinate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Point)
+	fc.Result = res
+	return ec.marshalNPoint2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐPoint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_driving_speed(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DrivingSpeed, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_dealing_status(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DealingStatus, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_user_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_deal_desc(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DealDesc, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_alarm_type(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AlarmType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_alarm_begin_time(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AlarmBeginTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_alarm_end_time(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AlarmEndTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_license_plate_number(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LicensePlateNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleAlarmData_license_plate_color(ctx context.Context, field graphql.CollectedField, obj *model.VehicleAlarmData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleAlarmData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LicensePlateColor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _VehicleDriverBinding_vehicle_driver_binding_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleDriverBinding) (ret graphql.Marshaler) {
@@ -7160,7 +15275,7 @@ func (ec *executionContext) _VehicleInfo_vehicle_maintenances(ctx context.Contex
 	}
 	res := resTmp.([]*model.VehicleMaintenance)
 	fc.Result = res
-	return ec.marshalOVehicleMaintenance2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleMaintenance(ctx, field.Selections, res)
+	return ec.marshalOVehicleMaintenance2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleMaintenance(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _VehicleInfo_vehicle_displacement(ctx context.Context, field graphql.CollectedField, obj *model.VehicleInfo) (ret graphql.Marshaler) {
@@ -7845,6 +15960,2791 @@ func (ec *executionContext) _VehicleMaintenance_maintenance_kilometers(ctx conte
 	res := resTmp.(*float64)
 	fc.Result = res
 	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleSupervisionPhoto_supervision_photo_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleSupervisionPhoto) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleSupervisionPhoto",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SupervisionPhotoID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleSupervisionPhoto_vehicle_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleSupervisionPhoto) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleSupervisionPhoto",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VehicleID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleSupervisionPhoto_driver_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleSupervisionPhoto) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleSupervisionPhoto",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DriverID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleSupervisionPhoto_enterprise_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleSupervisionPhoto) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleSupervisionPhoto",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EnterpriseID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleSupervisionPhoto_update_time(ctx context.Context, field graphql.CollectedField, obj *model.VehicleSupervisionPhoto) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleSupervisionPhoto",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleSupervisionPhoto_monitoring_pic(ctx context.Context, field graphql.CollectedField, obj *model.VehicleSupervisionPhoto) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleSupervisionPhoto",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MonitoringPic, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleSupervisionPhoto_monitoring_pic_upload_time(ctx context.Context, field graphql.CollectedField, obj *model.VehicleSupervisionPhoto) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleSupervisionPhoto",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MonitoringPicUploadTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleSupervisionPhoto_IMEI(ctx context.Context, field graphql.CollectedField, obj *model.VehicleSupervisionPhoto) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleSupervisionPhoto",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Imei, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleSupervisionPhoto_SIM_number(ctx context.Context, field graphql.CollectedField, obj *model.VehicleSupervisionPhoto) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleSupervisionPhoto",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SimNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_acc(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Acc, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_brake(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Brake, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_left_lamp(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LeftLamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_right_lamp(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RightLamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_near_lamp(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NearLamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_far_lamp(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FarLamp, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_loud_speaker(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LoudSpeaker, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_locate(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Locate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_front_door(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FrontDoor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_GPS_open(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GpsOpen, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_BD_open(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BdOpen, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_camera(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Camera, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_driving_speed(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DrivingSpeed, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_remarks(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Remarks, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleTerminalStatus_record_time(ctx context.Context, field graphql.CollectedField, obj *model.VehicleTerminalStatus) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleTerminalStatus",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RecordTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_violation_detail_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ViolationDetailID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_vehicle_info(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VehicleInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VehicleInfo)
+	fc.Result = res
+	return ec.marshalOVehicleInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_driver_info(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DriverInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.DriverInfo)
+	fc.Result = res
+	return ec.marshalODriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_enterprise_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EnterpriseID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_illegal_data(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalData, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VioCodewfdm)
+	fc.Result = res
+	return ec.marshalOVIO_CODEWFDM2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVioCodewfdm(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_illegal_time(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_illegal_handling_status(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalHandlingStatus, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_illega_location(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegaLocation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_standard_value(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StandardValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_measured_value(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MeasuredValue, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_discovery_agency(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DiscoveryAgency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_illegal_photo(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IllegalPhoto, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_is_notice_driver(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsNoticeDriver, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_notice_time(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NoticeTime, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_decision_number(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DecisionNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_payment_mark(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PaymentMark, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_party_name(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PartyName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_information_source(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InformationSource, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_vehicle_information(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VehicleInformation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_update_time_in(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateTimeIn, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_is_handle(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsHandle, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_handle_by(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HandleBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_handle_at(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HandleAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_is_send(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsSend, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_create_at(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_create_by(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_update_at(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_update_by(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_delete_at(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationDetails_delete_by(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationDetails) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationDetails",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationRankData_vehicle_info(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationRankData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationRankData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VehicleInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VehicleInfo)
+	fc.Result = res
+	return ec.marshalOVehicleInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationRankData_deduction_info(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationRankData) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationRankData",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeductionInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.CycleViolationData)
+	fc.Result = res
+	return ec.marshalOCycleViolationData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐCycleViolationData(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_violation_scoring_item_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ViolationScoringItemID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_deduction_item_description(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeductionItemDescription, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_deduction_category(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeductionCategory, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_demerit_points(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DemeritPoints, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_is_delete(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsDelete, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_create_at(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_create_by(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_update_at(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_update_by(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_delete_at(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringItems_delete_by(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringItems) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringItems",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_violation_scoring_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ViolationScoringID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_vehicle_id(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VehicleID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_violation_scoring_item(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ViolationScoringItem, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.VehicleViolationScoringItems)
+	fc.Result = res
+	return ec.marshalOVehicleViolationScoringItems2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationScoringItems(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_demerit_points(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DemeritPoints, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_remarks(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Remarks, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_is_delete(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsDelete, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_create_at(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_create_by(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_update_at(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_update_by(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdateBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_delete_at(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _VehicleViolationScoringRecord_delete_by(ctx context.Context, field graphql.CollectedField, obj *model.VehicleViolationScoringRecord) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "VehicleViolationScoringRecord",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeleteBy, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -8994,6 +19894,90 @@ func (ec *executionContext) unmarshalInputDateRange(ctx context.Context, obj int
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDistrictTenTypeIllegalDataFilter(ctx context.Context, obj interface{}) (model.DistrictTenTypeIllegalDataFilter, error) {
+	var it model.DistrictTenTypeIllegalDataFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "business_scope":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("business_scope"))
+			it.BusinessScope, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "illegalBetween":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegalBetween"))
+			it.IllegalBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDistrictVehicleViolationHandleListFilter(ctx context.Context, obj interface{}) (model.DistrictVehicleViolationHandleListFilter, error) {
+	var it model.DistrictVehicleViolationHandleListFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "business_scope":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("business_scope"))
+			it.BusinessScope, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "illegalBetween":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegalBetween"))
+			it.IllegalBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDistrictVehicleViolationListFilter(ctx context.Context, obj interface{}) (model.DistrictVehicleViolationListFilter, error) {
+	var it model.DistrictVehicleViolationListFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "illegal_type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegal_type"))
+			it.IllegalType, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "illegalBetween":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegalBetween"))
+			it.IllegalBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputDriverDataSort(ctx context.Context, obj interface{}) (model.DriverDataSort, error) {
 	var it model.DriverDataSort
 	var asMap = obj.(map[string]interface{})
@@ -9011,7 +19995,7 @@ func (ec *executionContext) unmarshalInputDriverDataSort(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort"))
-			it.Sort, err = ec.unmarshalOSortDirection2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, v)
+			it.Sort, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9019,7 +20003,35 @@ func (ec *executionContext) unmarshalInputDriverDataSort(ctx context.Context, ob
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sortBy"))
-			it.SortBy, err = ec.unmarshalOSortableDriverField2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableDriverField(ctx, v)
+			it.SortBy, err = ec.unmarshalOSortableDriverField2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableDriverField(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDriverDrinkAndDrugDataFilter(ctx context.Context, obj interface{}) (model.DriverDrinkAndDrugDataFilter, error) {
+	var it model.DriverDrinkAndDrugDataFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "vehicle_type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vehicle_type"))
+			it.VehicleType, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "illegalBetween":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegalBetween"))
+			it.IllegalBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9081,6 +20093,174 @@ func (ec *executionContext) unmarshalInputDriverInfoFilter(ctx context.Context, 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDriverThreeScoringCycleDataFilter(ctx context.Context, obj interface{}) (model.DriverThreeScoringCycleDataFilter, error) {
+	var it model.DriverThreeScoringCycleDataFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "driver_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("driver_name"))
+			it.DriverName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "driver_identity_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("driver_identity_id"))
+			it.DriverIdentityID, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "enterprise_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enterprise_name"))
+			it.EnterpriseName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputDriverViolationListFilter(ctx context.Context, obj interface{}) (model.DriverViolationListFilter, error) {
+	var it model.DriverViolationListFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "driver_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("driver_name"))
+			it.DriverName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "enterprise_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enterprise_name"))
+			it.EnterpriseName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "illegal_code":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegal_code"))
+			it.IllegalCode, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "illegalBetween":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegalBetween"))
+			it.IllegalBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "handle_type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("handle_type"))
+			it.HandleType, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputFourTypeKeyVehicleViolationClearFilter(ctx context.Context, obj interface{}) (model.FourTypeKeyVehicleViolationClearFilter, error) {
+	var it model.FourTypeKeyVehicleViolationClearFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "illegalBetween":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegalBetween"))
+			it.IllegalBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputIllegalRateOfVehicleFilter(ctx context.Context, obj interface{}) (model.IllegalRateOfVehicleFilter, error) {
+	var it model.IllegalRateOfVehicleFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "illegalBetween":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegalBetween"))
+			it.IllegalBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "enterprise_nature":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enterprise_nature"))
+			it.EnterpriseNature, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "vehicle_type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vehicle_type"))
+			it.VehicleType, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "VehicleNumberGreaterThan":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("VehicleNumberGreaterThan"))
+			it.VehicleNumberGreaterThan, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "IllegalNumberGreaterThan":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("IllegalNumberGreaterThan"))
+			it.IllegalNumberGreaterThan, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "district":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("district"))
+			it.District, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj interface{}) (model.NewDriverInfo, error) {
 	var it model.NewDriverInfo
 	var asMap = obj.(map[string]interface{})
@@ -9091,7 +20271,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("driver_name"))
-			it.DriverName, err = ec.unmarshalNString2string(ctx, v)
+			it.DriverName, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9099,7 +20279,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sex"))
-			it.Sex, err = ec.unmarshalNInt2int(ctx, v)
+			it.Sex, err = ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9107,7 +20287,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("driver_identity_id"))
-			it.DriverIdentityID, err = ec.unmarshalNString2string(ctx, v)
+			it.DriverIdentityID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9115,7 +20295,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id_card_address"))
-			it.IDCardAddress, err = ec.unmarshalNString2string(ctx, v)
+			it.IDCardAddress, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9123,7 +20303,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enterprise_name"))
-			it.EnterpriseName, err = ec.unmarshalNString2string(ctx, v)
+			it.EnterpriseName, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9131,7 +20311,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("department_name"))
-			it.DepartmentName, err = ec.unmarshalNString2string(ctx, v)
+			it.DepartmentName, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9147,7 +20327,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("SMS_verification_code"))
-			it.SmsVerificationCode, err = ec.unmarshalNString2string(ctx, v)
+			it.SmsVerificationCode, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9155,7 +20335,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("driver_license_address"))
-			it.DriverLicenseAddress, err = ec.unmarshalNString2string(ctx, v)
+			it.DriverLicenseAddress, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9163,7 +20343,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file_number"))
-			it.FileNumber, err = ec.unmarshalNString2string(ctx, v)
+			it.FileNumber, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9171,7 +20351,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id_card_pic"))
-			it.IDCardPic, err = ec.unmarshalNUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUploadᚄ(ctx, v)
+			it.IDCardPic, err = ec.unmarshalOUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9179,7 +20359,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("driver_license"))
-			it.DriverLicense, err = ec.unmarshalNUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUploadᚄ(ctx, v)
+			it.DriverLicense, err = ec.unmarshalOUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9187,7 +20367,7 @@ func (ec *executionContext) unmarshalInputNewDriverInfo(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("labor_contract"))
-			it.LaborContract, err = ec.unmarshalNUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUploadᚄ(ctx, v)
+			it.LaborContract, err = ec.unmarshalOUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9333,6 +20513,142 @@ func (ec *executionContext) unmarshalInputNewVehicleInfo(ctx context.Context, ob
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputSingleCarIllegalStatisticsFilter(ctx context.Context, obj interface{}) (model.SingleCarIllegalStatisticsFilter, error) {
+	var it model.SingleCarIllegalStatisticsFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "illegalBetween":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegalBetween"))
+			it.IllegalBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "license_plate_number":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("license_plate_number"))
+			it.LicensePlateNumber, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "vehicle_type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vehicle_type"))
+			it.VehicleType, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "enterprise_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enterprise_name"))
+			it.EnterpriseName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "VehicleNumberGreaterThan":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("VehicleNumberGreaterThan"))
+			it.VehicleNumberGreaterThan, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "IllegalNumberGreaterThan":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("IllegalNumberGreaterThan"))
+			it.IllegalNumberGreaterThan, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSmsRemindLogFilter(ctx context.Context, obj interface{}) (model.SmsRemindLogFilter, error) {
+	var it model.SmsRemindLogFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "registerBetween":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("registerBetween"))
+			it.RegisterBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "telephone":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("telephone"))
+			it.Telephone, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "vehicle_type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vehicle_type"))
+			it.VehicleType, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "text_content":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text_content"))
+			it.TextContent, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "district":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("district"))
+			it.District, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "enterprise_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enterprise_name"))
+			it.EnterpriseName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "driver_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("driver_name"))
+			it.DriverName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "license_plate_number":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("license_plate_number"))
+			it.LicensePlateNumber, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputVehicleDataSort(ctx context.Context, obj interface{}) (model.VehicleDataSort, error) {
 	var it model.VehicleDataSort
 	var asMap = obj.(map[string]interface{})
@@ -9350,7 +20666,7 @@ func (ec *executionContext) unmarshalInputVehicleDataSort(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort"))
-			it.Sort, err = ec.unmarshalOSortDirection2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, v)
+			it.Sort, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9358,7 +20674,42 @@ func (ec *executionContext) unmarshalInputVehicleDataSort(ctx context.Context, o
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sortBy"))
-			it.SortBy, err = ec.unmarshalOSortableVehicleField2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableVehicleField(ctx, v)
+			it.SortBy, err = ec.unmarshalOSortableVehicleField2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableVehicleField(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputVehicleDriverBindingDataSort(ctx context.Context, obj interface{}) (model.VehicleDriverBindingDataSort, error) {
+	var it model.VehicleDriverBindingDataSort
+	var asMap = obj.(map[string]interface{})
+
+	if _, present := asMap["sort"]; !present {
+		asMap["sort"] = "DESCENDING"
+	}
+	if _, present := asMap["sortBy"]; !present {
+		asMap["sortBy"] = "created"
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "sort":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sort"))
+			it.Sort, err = ec.unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "sortBy":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sortBy"))
+			it.SortBy, err = ec.unmarshalOSortableBindingField2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableBindingField(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9454,7 +20805,7 @@ func (ec *executionContext) unmarshalInputVehicleInfoFilter(ctx context.Context,
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("registerBetween"))
-			it.RegisterBetween, err = ec.unmarshalODateRange2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			it.RegisterBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9504,6 +20855,126 @@ func (ec *executionContext) unmarshalInputVehicleInfoFilter(ctx context.Context,
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputVehicleViolationDetailListFilter(ctx context.Context, obj interface{}) (model.VehicleViolationDetailListFilter, error) {
+	var it model.VehicleViolationDetailListFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "license_plate_number":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("license_plate_number"))
+			it.LicensePlateNumber, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "is_handle":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("is_handle"))
+			it.IsHandle, err = ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "illegal_code":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegal_code"))
+			it.IllegalCode, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "illegalBetween":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegalBetween"))
+			it.IllegalBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "illegal_type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("illegal_type"))
+			it.IllegalType, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "handle_type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("handle_type"))
+			it.HandleType, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "business_scope":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("business_scope"))
+			it.BusinessScope, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "enterprise_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enterprise_name"))
+			it.EnterpriseName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "handle_Between":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("handle_Between"))
+			it.HandleBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputVehicleViolationRankDataFilter(ctx context.Context, obj interface{}) (model.VehicleViolationRankDataFilter, error) {
+	var it model.VehicleViolationRankDataFilter
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "license_plate_number":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("license_plate_number"))
+			it.LicensePlateNumber, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "registerBetween":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("registerBetween"))
+			it.RegisterBetween, err = ec.unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "enterprise_name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enterprise_name"))
+			it.EnterpriseName, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -9540,6 +21011,48 @@ func (ec *executionContext) _TimeModel(ctx context.Context, sel ast.SelectionSet
 			return graphql.Null
 		}
 		return ec._VehicleInfo(ctx, sel, obj)
+	case model.VehicleViolationDetails:
+		return ec._VehicleViolationDetails(ctx, sel, &obj)
+	case *model.VehicleViolationDetails:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._VehicleViolationDetails(ctx, sel, obj)
+	case model.VehicleViolationScoringRecord:
+		return ec._VehicleViolationScoringRecord(ctx, sel, &obj)
+	case *model.VehicleViolationScoringRecord:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._VehicleViolationScoringRecord(ctx, sel, obj)
+	case model.VehicleViolationScoringItems:
+		return ec._VehicleViolationScoringItems(ctx, sel, &obj)
+	case *model.VehicleViolationScoringItems:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._VehicleViolationScoringItems(ctx, sel, obj)
+	case model.SmsRemindLog:
+		return ec._SmsRemindLog(ctx, sel, &obj)
+	case *model.SmsRemindLog:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._SmsRemindLog(ctx, sel, obj)
+	case model.RegionalViolationRegister:
+		return ec._RegionalViolationRegister(ctx, sel, &obj)
+	case *model.RegionalViolationRegister:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._RegionalViolationRegister(ctx, sel, obj)
+	case model.DisputeViolationRecord:
+		return ec._DisputeViolationRecord(ctx, sel, &obj)
+	case *model.DisputeViolationRecord:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._DisputeViolationRecord(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -9575,6 +21088,178 @@ func (ec *executionContext) _BusinessScopeInfo(ctx context.Context, sel ast.Sele
 	return out
 }
 
+var cycleViolationDataImplementors = []string{"CycleViolationData"}
+
+func (ec *executionContext) _CycleViolationData(ctx context.Context, sel ast.SelectionSet, obj *model.CycleViolationData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, cycleViolationDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CycleViolationData")
+		case "demerit_points":
+			out.Values[i] = ec._CycleViolationData_demerit_points(ctx, field, obj)
+		case "number_of_violation":
+			out.Values[i] = ec._CycleViolationData_number_of_violation(ctx, field, obj)
+		case "penalty":
+			out.Values[i] = ec._CycleViolationData_penalty(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var disputeViolationRecordImplementors = []string{"DisputeViolationRecord", "TimeModel"}
+
+func (ec *executionContext) _DisputeViolationRecord(ctx context.Context, sel ast.SelectionSet, obj *model.DisputeViolationRecord) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, disputeViolationRecordImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DisputeViolationRecord")
+		case "id":
+			out.Values[i] = ec._DisputeViolationRecord_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "dispute_violation_id":
+			out.Values[i] = ec._DisputeViolationRecord_dispute_violation_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "violation_detail":
+			out.Values[i] = ec._DisputeViolationRecord_violation_detail(ctx, field, obj)
+		case "written_application_materials":
+			out.Values[i] = ec._DisputeViolationRecord_written_application_materials(ctx, field, obj)
+		case "labor_contract":
+			out.Values[i] = ec._DisputeViolationRecord_labor_contract(ctx, field, obj)
+		case "driving_log":
+			out.Values[i] = ec._DisputeViolationRecord_driving_log(ctx, field, obj)
+		case "witness":
+			out.Values[i] = ec._DisputeViolationRecord_witness(ctx, field, obj)
+		case "statement":
+			out.Values[i] = ec._DisputeViolationRecord_statement(ctx, field, obj)
+		case "pic_evidence":
+			out.Values[i] = ec._DisputeViolationRecord_pic_evidence(ctx, field, obj)
+		case "driver_license":
+			out.Values[i] = ec._DisputeViolationRecord_driver_license(ctx, field, obj)
+		case "driving_license":
+			out.Values[i] = ec._DisputeViolationRecord_driving_license(ctx, field, obj)
+		case "id_card":
+			out.Values[i] = ec._DisputeViolationRecord_id_card(ctx, field, obj)
+		case "business_license":
+			out.Values[i] = ec._DisputeViolationRecord_business_license(ctx, field, obj)
+		case "organization_code":
+			out.Values[i] = ec._DisputeViolationRecord_organization_code(ctx, field, obj)
+		case "legal_person_id_number":
+			out.Values[i] = ec._DisputeViolationRecord_legal_person_id_number(ctx, field, obj)
+		case "agent_id_number":
+			out.Values[i] = ec._DisputeViolationRecord_agent_id_number(ctx, field, obj)
+		case "vehicle_manager_id_card":
+			out.Values[i] = ec._DisputeViolationRecord_vehicle_manager_id_card(ctx, field, obj)
+		case "other_evidence":
+			out.Values[i] = ec._DisputeViolationRecord_other_evidence(ctx, field, obj)
+		case "approve_state":
+			out.Values[i] = ec._DisputeViolationRecord_approve_state(ctx, field, obj)
+		case "update_time_in":
+			out.Values[i] = ec._DisputeViolationRecord_update_time_in(ctx, field, obj)
+		case "contact_address":
+			out.Values[i] = ec._DisputeViolationRecord_contact_address(ctx, field, obj)
+		case "is_delete":
+			out.Values[i] = ec._DisputeViolationRecord_is_delete(ctx, field, obj)
+		case "create_at":
+			out.Values[i] = ec._DisputeViolationRecord_create_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "create_by":
+			out.Values[i] = ec._DisputeViolationRecord_create_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_at":
+			out.Values[i] = ec._DisputeViolationRecord_update_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_by":
+			out.Values[i] = ec._DisputeViolationRecord_update_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "delete_at":
+			out.Values[i] = ec._DisputeViolationRecord_delete_at(ctx, field, obj)
+		case "delete_by":
+			out.Values[i] = ec._DisputeViolationRecord_delete_by(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var disputeViolationRecordLogImplementors = []string{"DisputeViolationRecordLog"}
+
+func (ec *executionContext) _DisputeViolationRecordLog(ctx context.Context, sel ast.SelectionSet, obj *model.DisputeViolationRecordLog) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, disputeViolationRecordLogImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DisputeViolationRecordLog")
+		case "id":
+			out.Values[i] = ec._DisputeViolationRecordLog_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "dispute_violation_log_id":
+			out.Values[i] = ec._DisputeViolationRecordLog_dispute_violation_log_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "dispute_violation_data":
+			out.Values[i] = ec._DisputeViolationRecordLog_dispute_violation_data(ctx, field, obj)
+		case "reviewer":
+			out.Values[i] = ec._DisputeViolationRecordLog_reviewer(ctx, field, obj)
+		case "review_time":
+			out.Values[i] = ec._DisputeViolationRecordLog_review_time(ctx, field, obj)
+		case "review_opinion":
+			out.Values[i] = ec._DisputeViolationRecordLog_review_opinion(ctx, field, obj)
+		case "review_result":
+			out.Values[i] = ec._DisputeViolationRecordLog_review_result(ctx, field, obj)
+		case "review_action_name":
+			out.Values[i] = ec._DisputeViolationRecordLog_review_action_name(ctx, field, obj)
+		case "approver":
+			out.Values[i] = ec._DisputeViolationRecordLog_approver(ctx, field, obj)
+		case "update_time_in":
+			out.Values[i] = ec._DisputeViolationRecordLog_update_time_in(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var districtCountImplementors = []string{"DistrictCount"}
 
 func (ec *executionContext) _DistrictCount(ctx context.Context, sel ast.SelectionSet, obj *model.DistrictCount) graphql.Marshaler {
@@ -9596,6 +21281,58 @@ func (ec *executionContext) _DistrictCount(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var districtTenTypeIllegalDataImplementors = []string{"DistrictTenTypeIllegalData"}
+
+func (ec *executionContext) _DistrictTenTypeIllegalData(ctx context.Context, sel ast.SelectionSet, obj *model.DistrictTenTypeIllegalData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, districtTenTypeIllegalDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DistrictTenTypeIllegalData")
+		case "district_name":
+			out.Values[i] = ec._DistrictTenTypeIllegalData_district_name(ctx, field, obj)
+		case "illegal_data":
+			out.Values[i] = ec._DistrictTenTypeIllegalData_illegal_data(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var driverDrinkAndDrugDataImplementors = []string{"DriverDrinkAndDrugData"}
+
+func (ec *executionContext) _DriverDrinkAndDrugData(ctx context.Context, sel ast.SelectionSet, obj *model.DriverDrinkAndDrugData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, driverDrinkAndDrugDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DriverDrinkAndDrugData")
+		case "driver_info":
+			out.Values[i] = ec._DriverDrinkAndDrugData_driver_info(ctx, field, obj)
+		case "illegal_data":
+			out.Values[i] = ec._DriverDrinkAndDrugData_illegal_data(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9822,6 +21559,128 @@ func (ec *executionContext) _DriverInfo(ctx context.Context, sel ast.SelectionSe
 	return out
 }
 
+var driverThreeScoringCycleDataImplementors = []string{"DriverThreeScoringCycleData"}
+
+func (ec *executionContext) _DriverThreeScoringCycleData(ctx context.Context, sel ast.SelectionSet, obj *model.DriverThreeScoringCycleData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, driverThreeScoringCycleDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DriverThreeScoringCycleData")
+		case "driver_info":
+			out.Values[i] = ec._DriverThreeScoringCycleData_driver_info(ctx, field, obj)
+		case "CycleViolationDataList":
+			out.Values[i] = ec._DriverThreeScoringCycleData_CycleViolationDataList(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var fourTypeKeyVehicleViolationImplementors = []string{"FourTypeKeyVehicleViolation"}
+
+func (ec *executionContext) _FourTypeKeyVehicleViolation(ctx context.Context, sel ast.SelectionSet, obj *model.FourTypeKeyVehicleViolation) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fourTypeKeyVehicleViolationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FourTypeKeyVehicleViolation")
+		case "total":
+			out.Values[i] = ec._FourTypeKeyVehicleViolation_total(ctx, field, obj)
+		case "handle_number":
+			out.Values[i] = ec._FourTypeKeyVehicleViolation_handle_number(ctx, field, obj)
+		case "unhandled_number":
+			out.Values[i] = ec._FourTypeKeyVehicleViolation_unhandled_number(ctx, field, obj)
+		case "Illegal_handle_rate":
+			out.Values[i] = ec._FourTypeKeyVehicleViolation_Illegal_handle_rate(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var fourTypeKeyVehicleViolationClearImplementors = []string{"FourTypeKeyVehicleViolationClear"}
+
+func (ec *executionContext) _FourTypeKeyVehicleViolationClear(ctx context.Context, sel ast.SelectionSet, obj *model.FourTypeKeyVehicleViolationClear) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fourTypeKeyVehicleViolationClearImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FourTypeKeyVehicleViolationClear")
+		case "district_name":
+			out.Values[i] = ec._FourTypeKeyVehicleViolationClear_district_name(ctx, field, obj)
+		case "handle_data":
+			out.Values[i] = ec._FourTypeKeyVehicleViolationClear_handle_data(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var illegalRateOfVehicleImplementors = []string{"IllegalRateOfVehicle"}
+
+func (ec *executionContext) _IllegalRateOfVehicle(ctx context.Context, sel ast.SelectionSet, obj *model.IllegalRateOfVehicle) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, illegalRateOfVehicleImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("IllegalRateOfVehicle")
+		case "enterprise_name":
+			out.Values[i] = ec._IllegalRateOfVehicle_enterprise_name(ctx, field, obj)
+		case "district_name":
+			out.Values[i] = ec._IllegalRateOfVehicle_district_name(ctx, field, obj)
+		case "enterprise_address":
+			out.Values[i] = ec._IllegalRateOfVehicle_enterprise_address(ctx, field, obj)
+		case "total_number_of_vehicle":
+			out.Values[i] = ec._IllegalRateOfVehicle_total_number_of_vehicle(ctx, field, obj)
+		case "number_of_illegal_vehicle":
+			out.Values[i] = ec._IllegalRateOfVehicle_number_of_illegal_vehicle(ctx, field, obj)
+		case "total_number_of_violations":
+			out.Values[i] = ec._IllegalRateOfVehicle_total_number_of_violations(ctx, field, obj)
+		case "handle_number":
+			out.Values[i] = ec._IllegalRateOfVehicle_handle_number(ctx, field, obj)
+		case "unhandled_number":
+			out.Values[i] = ec._IllegalRateOfVehicle_unhandled_number(ctx, field, obj)
+		case "Illegal_handle_rate":
+			out.Values[i] = ec._IllegalRateOfVehicle_Illegal_handle_rate(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -9893,6 +21752,38 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
+var pointImplementors = []string{"Point"}
+
+func (ec *executionContext) _Point(ctx context.Context, sel ast.SelectionSet, obj *model.Point) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pointImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Point")
+		case "longitude":
+			out.Values[i] = ec._Point_longitude(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "latitude":
+			out.Values[i] = ec._Point_latitude(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -9931,6 +21822,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getVehicleInfoList(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getVehicleAlarmDataList":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getVehicleAlarmDataList(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -9978,10 +21883,548 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "getDistrictVehicleViolationList":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getDistrictVehicleViolationList(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getVehicleViolationDetailList":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getVehicleViolationDetailList(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getDistrictVehicleViolationHandleList":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getDistrictVehicleViolationHandleList(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getDriverViolationList":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getDriverViolationList(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getDriverThreeScoringCycleData":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getDriverThreeScoringCycleData(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getVehicleViolationRankData":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getVehicleViolationRankData(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getDistrictTenTypeIllegalData":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getDistrictTenTypeIllegalData(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getDriverDrinkAndDrugData":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getDriverDrinkAndDrugData(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getFourTypeKeyVehicleViolationClear":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getFourTypeKeyVehicleViolationClear(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getIllegalRateOfVehicle":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getIllegalRateOfVehicle(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getSingleCarIllegalStatistics":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSingleCarIllegalStatistics(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "getSmsRemindLog":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getSmsRemindLog(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var regionalViolationRegisterImplementors = []string{"RegionalViolationRegister", "TimeModel"}
+
+func (ec *executionContext) _RegionalViolationRegister(ctx context.Context, sel ast.SelectionSet, obj *model.RegionalViolationRegister) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, regionalViolationRegisterImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RegionalViolationRegister")
+		case "id":
+			out.Values[i] = ec._RegionalViolationRegister_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "regional_violation_register_id":
+			out.Values[i] = ec._RegionalViolationRegister_regional_violation_register_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "violation_detail":
+			out.Values[i] = ec._RegionalViolationRegister_violation_detail(ctx, field, obj)
+		case "vehicle_info":
+			out.Values[i] = ec._RegionalViolationRegister_vehicle_info(ctx, field, obj)
+		case "driver_info":
+			out.Values[i] = ec._RegionalViolationRegister_driver_info(ctx, field, obj)
+		case "illegal_data":
+			out.Values[i] = ec._RegionalViolationRegister_illegal_data(ctx, field, obj)
+		case "illegal_time":
+			out.Values[i] = ec._RegionalViolationRegister_illegal_time(ctx, field, obj)
+		case "illegal_type":
+			out.Values[i] = ec._RegionalViolationRegister_illegal_type(ctx, field, obj)
+		case "register_time":
+			out.Values[i] = ec._RegionalViolationRegister_register_time(ctx, field, obj)
+		case "processing_agency":
+			out.Values[i] = ec._RegionalViolationRegister_processing_agency(ctx, field, obj)
+		case "operator":
+			out.Values[i] = ec._RegionalViolationRegister_operator(ctx, field, obj)
+		case "is_register":
+			out.Values[i] = ec._RegionalViolationRegister_is_register(ctx, field, obj)
+		case "is_delete":
+			out.Values[i] = ec._RegionalViolationRegister_is_delete(ctx, field, obj)
+		case "create_at":
+			out.Values[i] = ec._RegionalViolationRegister_create_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "create_by":
+			out.Values[i] = ec._RegionalViolationRegister_create_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_at":
+			out.Values[i] = ec._RegionalViolationRegister_update_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_by":
+			out.Values[i] = ec._RegionalViolationRegister_update_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "delete_at":
+			out.Values[i] = ec._RegionalViolationRegister_delete_at(ctx, field, obj)
+		case "delete_by":
+			out.Values[i] = ec._RegionalViolationRegister_delete_by(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var singleCarIllegalStatisticsImplementors = []string{"SingleCarIllegalStatistics"}
+
+func (ec *executionContext) _SingleCarIllegalStatistics(ctx context.Context, sel ast.SelectionSet, obj *model.SingleCarIllegalStatistics) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, singleCarIllegalStatisticsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SingleCarIllegalStatistics")
+		case "driver_info":
+			out.Values[i] = ec._SingleCarIllegalStatistics_driver_info(ctx, field, obj)
+		case "enterprise_name":
+			out.Values[i] = ec._SingleCarIllegalStatistics_enterprise_name(ctx, field, obj)
+		case "district_name":
+			out.Values[i] = ec._SingleCarIllegalStatistics_district_name(ctx, field, obj)
+		case "enterprise_address":
+			out.Values[i] = ec._SingleCarIllegalStatistics_enterprise_address(ctx, field, obj)
+		case "total_number_of_vehicle":
+			out.Values[i] = ec._SingleCarIllegalStatistics_total_number_of_vehicle(ctx, field, obj)
+		case "number_of_illegal_vehicle":
+			out.Values[i] = ec._SingleCarIllegalStatistics_number_of_illegal_vehicle(ctx, field, obj)
+		case "total_number_of_violations":
+			out.Values[i] = ec._SingleCarIllegalStatistics_total_number_of_violations(ctx, field, obj)
+		case "handle_number":
+			out.Values[i] = ec._SingleCarIllegalStatistics_handle_number(ctx, field, obj)
+		case "unhandled_number":
+			out.Values[i] = ec._SingleCarIllegalStatistics_unhandled_number(ctx, field, obj)
+		case "Illegal_handle_rate":
+			out.Values[i] = ec._SingleCarIllegalStatistics_Illegal_handle_rate(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var smsRemindLogImplementors = []string{"SmsRemindLog", "TimeModel"}
+
+func (ec *executionContext) _SmsRemindLog(ctx context.Context, sel ast.SelectionSet, obj *model.SmsRemindLog) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, smsRemindLogImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SmsRemindLog")
+		case "id":
+			out.Values[i] = ec._SmsRemindLog_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "sms_log_id":
+			out.Values[i] = ec._SmsRemindLog_sms_log_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "driver_info":
+			out.Values[i] = ec._SmsRemindLog_driver_info(ctx, field, obj)
+		case "cellphone_number":
+			out.Values[i] = ec._SmsRemindLog_cellphone_number(ctx, field, obj)
+		case "sms_content":
+			out.Values[i] = ec._SmsRemindLog_sms_content(ctx, field, obj)
+		case "is_send":
+			out.Values[i] = ec._SmsRemindLog_is_send(ctx, field, obj)
+		case "sms_type":
+			out.Values[i] = ec._SmsRemindLog_sms_type(ctx, field, obj)
+		case "is_delete":
+			out.Values[i] = ec._SmsRemindLog_is_delete(ctx, field, obj)
+		case "create_at":
+			out.Values[i] = ec._SmsRemindLog_create_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "create_by":
+			out.Values[i] = ec._SmsRemindLog_create_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_at":
+			out.Values[i] = ec._SmsRemindLog_update_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_by":
+			out.Values[i] = ec._SmsRemindLog_update_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "delete_at":
+			out.Values[i] = ec._SmsRemindLog_delete_at(ctx, field, obj)
+		case "delete_by":
+			out.Values[i] = ec._SmsRemindLog_delete_by(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "newVehicleAlarmData":
+		return ec._Subscription_newVehicleAlarmData(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
+}
+
+var tenTypeIllegalDataImplementors = []string{"TenTypeIllegalData"}
+
+func (ec *executionContext) _TenTypeIllegalData(ctx context.Context, sel ast.SelectionSet, obj *model.TenTypeIllegalData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tenTypeIllegalDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TenTypeIllegalData")
+		case "type":
+			out.Values[i] = ec._TenTypeIllegalData_type(ctx, field, obj)
+		case "number":
+			out.Values[i] = ec._TenTypeIllegalData_number(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var vIO_CODEWFDMImplementors = []string{"VIO_CODEWFDM"}
+
+func (ec *executionContext) _VIO_CODEWFDM(ctx context.Context, sel ast.SelectionSet, obj *model.VioCodewfdm) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, vIO_CODEWFDMImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VIO_CODEWFDM")
+		case "WFXW":
+			out.Values[i] = ec._VIO_CODEWFDM_WFXW(ctx, field, obj)
+		case "WFMS":
+			out.Values[i] = ec._VIO_CODEWFDM_WFMS(ctx, field, obj)
+		case "WFJFS":
+			out.Values[i] = ec._VIO_CODEWFDM_WFJFS(ctx, field, obj)
+		case "FKJE_MIN":
+			out.Values[i] = ec._VIO_CODEWFDM_FKJE_MIN(ctx, field, obj)
+		case "FKJE_MAX":
+			out.Values[i] = ec._VIO_CODEWFDM_FKJE_MAX(ctx, field, obj)
+		case "XH":
+			out.Values[i] = ec._VIO_CODEWFDM_XH(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var vehicleAlarmDataImplementors = []string{"VehicleAlarmData"}
+
+func (ec *executionContext) _VehicleAlarmData(ctx context.Context, sel ast.SelectionSet, obj *model.VehicleAlarmData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, vehicleAlarmDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VehicleAlarmData")
+		case "alarm_data_id":
+			out.Values[i] = ec._VehicleAlarmData_alarm_data_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "vehicle_id":
+			out.Values[i] = ec._VehicleAlarmData_vehicle_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pid":
+			out.Values[i] = ec._VehicleAlarmData_pid(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "speed":
+			out.Values[i] = ec._VehicleAlarmData_speed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "record_time":
+			out.Values[i] = ec._VehicleAlarmData_record_time(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pos_desc":
+			out.Values[i] = ec._VehicleAlarmData_pos_desc(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "coordinate":
+			out.Values[i] = ec._VehicleAlarmData_coordinate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "driving_speed":
+			out.Values[i] = ec._VehicleAlarmData_driving_speed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "dealing_status":
+			out.Values[i] = ec._VehicleAlarmData_dealing_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "user_id":
+			out.Values[i] = ec._VehicleAlarmData_user_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deal_desc":
+			out.Values[i] = ec._VehicleAlarmData_deal_desc(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "alarm_type":
+			out.Values[i] = ec._VehicleAlarmData_alarm_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "alarm_begin_time":
+			out.Values[i] = ec._VehicleAlarmData_alarm_begin_time(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "alarm_end_time":
+			out.Values[i] = ec._VehicleAlarmData_alarm_end_time(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "license_plate_number":
+			out.Values[i] = ec._VehicleAlarmData_license_plate_number(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "license_plate_color":
+			out.Values[i] = ec._VehicleAlarmData_license_plate_color(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10224,6 +22667,433 @@ func (ec *executionContext) _VehicleMaintenance(ctx context.Context, sel ast.Sel
 			out.Values[i] = ec._VehicleMaintenance_maintenance_date(ctx, field, obj)
 		case "maintenance_kilometers":
 			out.Values[i] = ec._VehicleMaintenance_maintenance_kilometers(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var vehicleSupervisionPhotoImplementors = []string{"VehicleSupervisionPhoto"}
+
+func (ec *executionContext) _VehicleSupervisionPhoto(ctx context.Context, sel ast.SelectionSet, obj *model.VehicleSupervisionPhoto) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, vehicleSupervisionPhotoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VehicleSupervisionPhoto")
+		case "supervision_photo_id":
+			out.Values[i] = ec._VehicleSupervisionPhoto_supervision_photo_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "vehicle_id":
+			out.Values[i] = ec._VehicleSupervisionPhoto_vehicle_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "driver_id":
+			out.Values[i] = ec._VehicleSupervisionPhoto_driver_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "enterprise_id":
+			out.Values[i] = ec._VehicleSupervisionPhoto_enterprise_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_time":
+			out.Values[i] = ec._VehicleSupervisionPhoto_update_time(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "monitoring_pic":
+			out.Values[i] = ec._VehicleSupervisionPhoto_monitoring_pic(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "monitoring_pic_upload_time":
+			out.Values[i] = ec._VehicleSupervisionPhoto_monitoring_pic_upload_time(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "IMEI":
+			out.Values[i] = ec._VehicleSupervisionPhoto_IMEI(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "SIM_number":
+			out.Values[i] = ec._VehicleSupervisionPhoto_SIM_number(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var vehicleTerminalStatusImplementors = []string{"VehicleTerminalStatus"}
+
+func (ec *executionContext) _VehicleTerminalStatus(ctx context.Context, sel ast.SelectionSet, obj *model.VehicleTerminalStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, vehicleTerminalStatusImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VehicleTerminalStatus")
+		case "id":
+			out.Values[i] = ec._VehicleTerminalStatus_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "acc":
+			out.Values[i] = ec._VehicleTerminalStatus_acc(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "brake":
+			out.Values[i] = ec._VehicleTerminalStatus_brake(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "left_lamp":
+			out.Values[i] = ec._VehicleTerminalStatus_left_lamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "right_lamp":
+			out.Values[i] = ec._VehicleTerminalStatus_right_lamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "near_lamp":
+			out.Values[i] = ec._VehicleTerminalStatus_near_lamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "far_lamp":
+			out.Values[i] = ec._VehicleTerminalStatus_far_lamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "loud_speaker":
+			out.Values[i] = ec._VehicleTerminalStatus_loud_speaker(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "locate":
+			out.Values[i] = ec._VehicleTerminalStatus_locate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "front_door":
+			out.Values[i] = ec._VehicleTerminalStatus_front_door(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "GPS_open":
+			out.Values[i] = ec._VehicleTerminalStatus_GPS_open(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "BD_open":
+			out.Values[i] = ec._VehicleTerminalStatus_BD_open(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "camera":
+			out.Values[i] = ec._VehicleTerminalStatus_camera(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "driving_speed":
+			out.Values[i] = ec._VehicleTerminalStatus_driving_speed(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "remarks":
+			out.Values[i] = ec._VehicleTerminalStatus_remarks(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "record_time":
+			out.Values[i] = ec._VehicleTerminalStatus_record_time(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var vehicleViolationDetailsImplementors = []string{"VehicleViolationDetails", "TimeModel"}
+
+func (ec *executionContext) _VehicleViolationDetails(ctx context.Context, sel ast.SelectionSet, obj *model.VehicleViolationDetails) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, vehicleViolationDetailsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VehicleViolationDetails")
+		case "id":
+			out.Values[i] = ec._VehicleViolationDetails_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "violation_detail_id":
+			out.Values[i] = ec._VehicleViolationDetails_violation_detail_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "vehicle_info":
+			out.Values[i] = ec._VehicleViolationDetails_vehicle_info(ctx, field, obj)
+		case "driver_info":
+			out.Values[i] = ec._VehicleViolationDetails_driver_info(ctx, field, obj)
+		case "enterprise_id":
+			out.Values[i] = ec._VehicleViolationDetails_enterprise_id(ctx, field, obj)
+		case "illegal_data":
+			out.Values[i] = ec._VehicleViolationDetails_illegal_data(ctx, field, obj)
+		case "illegal_time":
+			out.Values[i] = ec._VehicleViolationDetails_illegal_time(ctx, field, obj)
+		case "illegal_handling_status":
+			out.Values[i] = ec._VehicleViolationDetails_illegal_handling_status(ctx, field, obj)
+		case "illega_location":
+			out.Values[i] = ec._VehicleViolationDetails_illega_location(ctx, field, obj)
+		case "standard_value":
+			out.Values[i] = ec._VehicleViolationDetails_standard_value(ctx, field, obj)
+		case "measured_value":
+			out.Values[i] = ec._VehicleViolationDetails_measured_value(ctx, field, obj)
+		case "discovery_agency":
+			out.Values[i] = ec._VehicleViolationDetails_discovery_agency(ctx, field, obj)
+		case "illegal_photo":
+			out.Values[i] = ec._VehicleViolationDetails_illegal_photo(ctx, field, obj)
+		case "is_notice_driver":
+			out.Values[i] = ec._VehicleViolationDetails_is_notice_driver(ctx, field, obj)
+		case "notice_time":
+			out.Values[i] = ec._VehicleViolationDetails_notice_time(ctx, field, obj)
+		case "decision_number":
+			out.Values[i] = ec._VehicleViolationDetails_decision_number(ctx, field, obj)
+		case "payment_mark":
+			out.Values[i] = ec._VehicleViolationDetails_payment_mark(ctx, field, obj)
+		case "party_name":
+			out.Values[i] = ec._VehicleViolationDetails_party_name(ctx, field, obj)
+		case "information_source":
+			out.Values[i] = ec._VehicleViolationDetails_information_source(ctx, field, obj)
+		case "vehicle_information":
+			out.Values[i] = ec._VehicleViolationDetails_vehicle_information(ctx, field, obj)
+		case "update_time_in":
+			out.Values[i] = ec._VehicleViolationDetails_update_time_in(ctx, field, obj)
+		case "is_handle":
+			out.Values[i] = ec._VehicleViolationDetails_is_handle(ctx, field, obj)
+		case "handle_by":
+			out.Values[i] = ec._VehicleViolationDetails_handle_by(ctx, field, obj)
+		case "handle_at":
+			out.Values[i] = ec._VehicleViolationDetails_handle_at(ctx, field, obj)
+		case "is_send":
+			out.Values[i] = ec._VehicleViolationDetails_is_send(ctx, field, obj)
+		case "create_at":
+			out.Values[i] = ec._VehicleViolationDetails_create_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "create_by":
+			out.Values[i] = ec._VehicleViolationDetails_create_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_at":
+			out.Values[i] = ec._VehicleViolationDetails_update_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_by":
+			out.Values[i] = ec._VehicleViolationDetails_update_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "delete_at":
+			out.Values[i] = ec._VehicleViolationDetails_delete_at(ctx, field, obj)
+		case "delete_by":
+			out.Values[i] = ec._VehicleViolationDetails_delete_by(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var vehicleViolationRankDataImplementors = []string{"VehicleViolationRankData"}
+
+func (ec *executionContext) _VehicleViolationRankData(ctx context.Context, sel ast.SelectionSet, obj *model.VehicleViolationRankData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, vehicleViolationRankDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VehicleViolationRankData")
+		case "vehicle_info":
+			out.Values[i] = ec._VehicleViolationRankData_vehicle_info(ctx, field, obj)
+		case "deduction_info":
+			out.Values[i] = ec._VehicleViolationRankData_deduction_info(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var vehicleViolationScoringItemsImplementors = []string{"VehicleViolationScoringItems", "TimeModel"}
+
+func (ec *executionContext) _VehicleViolationScoringItems(ctx context.Context, sel ast.SelectionSet, obj *model.VehicleViolationScoringItems) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, vehicleViolationScoringItemsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VehicleViolationScoringItems")
+		case "id":
+			out.Values[i] = ec._VehicleViolationScoringItems_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "violation_scoring_item_id":
+			out.Values[i] = ec._VehicleViolationScoringItems_violation_scoring_item_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deduction_item_description":
+			out.Values[i] = ec._VehicleViolationScoringItems_deduction_item_description(ctx, field, obj)
+		case "deduction_category":
+			out.Values[i] = ec._VehicleViolationScoringItems_deduction_category(ctx, field, obj)
+		case "demerit_points":
+			out.Values[i] = ec._VehicleViolationScoringItems_demerit_points(ctx, field, obj)
+		case "is_delete":
+			out.Values[i] = ec._VehicleViolationScoringItems_is_delete(ctx, field, obj)
+		case "create_at":
+			out.Values[i] = ec._VehicleViolationScoringItems_create_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "create_by":
+			out.Values[i] = ec._VehicleViolationScoringItems_create_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_at":
+			out.Values[i] = ec._VehicleViolationScoringItems_update_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_by":
+			out.Values[i] = ec._VehicleViolationScoringItems_update_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "delete_at":
+			out.Values[i] = ec._VehicleViolationScoringItems_delete_at(ctx, field, obj)
+		case "delete_by":
+			out.Values[i] = ec._VehicleViolationScoringItems_delete_by(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var vehicleViolationScoringRecordImplementors = []string{"VehicleViolationScoringRecord", "TimeModel"}
+
+func (ec *executionContext) _VehicleViolationScoringRecord(ctx context.Context, sel ast.SelectionSet, obj *model.VehicleViolationScoringRecord) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, vehicleViolationScoringRecordImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VehicleViolationScoringRecord")
+		case "id":
+			out.Values[i] = ec._VehicleViolationScoringRecord_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "violation_scoring_id":
+			out.Values[i] = ec._VehicleViolationScoringRecord_violation_scoring_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "vehicle_id":
+			out.Values[i] = ec._VehicleViolationScoringRecord_vehicle_id(ctx, field, obj)
+		case "violation_scoring_item":
+			out.Values[i] = ec._VehicleViolationScoringRecord_violation_scoring_item(ctx, field, obj)
+		case "demerit_points":
+			out.Values[i] = ec._VehicleViolationScoringRecord_demerit_points(ctx, field, obj)
+		case "remarks":
+			out.Values[i] = ec._VehicleViolationScoringRecord_remarks(ctx, field, obj)
+		case "is_delete":
+			out.Values[i] = ec._VehicleViolationScoringRecord_is_delete(ctx, field, obj)
+		case "create_at":
+			out.Values[i] = ec._VehicleViolationScoringRecord_create_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "create_by":
+			out.Values[i] = ec._VehicleViolationScoringRecord_create_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_at":
+			out.Values[i] = ec._VehicleViolationScoringRecord_update_at(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "update_by":
+			out.Values[i] = ec._VehicleViolationScoringRecord_update_by(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "delete_at":
+			out.Values[i] = ec._VehicleViolationScoringRecord_delete_at(ctx, field, obj)
+		case "delete_by":
+			out.Values[i] = ec._VehicleViolationScoringRecord_delete_by(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10495,7 +23365,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNBusinessScopeInfo2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐBusinessScopeInfoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.BusinessScopeInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNBusinessScopeInfo2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐBusinessScopeInfoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.BusinessScopeInfo) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -10519,7 +23389,7 @@ func (ec *executionContext) marshalNBusinessScopeInfo2ᚕᚖlaiᚗcomᚋgqlgen_s
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNBusinessScopeInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐBusinessScopeInfo(ctx, sel, v[i])
+			ret[i] = ec.marshalNBusinessScopeInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐBusinessScopeInfo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10532,7 +23402,7 @@ func (ec *executionContext) marshalNBusinessScopeInfo2ᚕᚖlaiᚗcomᚋgqlgen_s
 	return ret
 }
 
-func (ec *executionContext) marshalNBusinessScopeInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐBusinessScopeInfo(ctx context.Context, sel ast.SelectionSet, v *model.BusinessScopeInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNBusinessScopeInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐBusinessScopeInfo(ctx context.Context, sel ast.SelectionSet, v *model.BusinessScopeInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -10542,7 +23412,7 @@ func (ec *executionContext) marshalNBusinessScopeInfo2ᚖlaiᚗcomᚋgqlgen_stud
 	return ec._BusinessScopeInfo(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNDistrictCount2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCountᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.DistrictCount) graphql.Marshaler {
+func (ec *executionContext) marshalNDistrictCount2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCountᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.DistrictCount) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -10566,7 +23436,7 @@ func (ec *executionContext) marshalNDistrictCount2ᚕᚖlaiᚗcomᚋgqlgen_study
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNDistrictCount2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCount(ctx, sel, v[i])
+			ret[i] = ec.marshalNDistrictCount2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCount(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10579,7 +23449,7 @@ func (ec *executionContext) marshalNDistrictCount2ᚕᚖlaiᚗcomᚋgqlgen_study
 	return ret
 }
 
-func (ec *executionContext) marshalNDistrictCount2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCount(ctx context.Context, sel ast.SelectionSet, v *model.DistrictCount) graphql.Marshaler {
+func (ec *executionContext) marshalNDistrictCount2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictCount(ctx context.Context, sel ast.SelectionSet, v *model.DistrictCount) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -10589,11 +23459,7 @@ func (ec *executionContext) marshalNDistrictCount2ᚖlaiᚗcomᚋgqlgen_studyᚋ
 	return ec._DistrictCount(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNDriverInfo2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx context.Context, sel ast.SelectionSet, v model.DriverInfo) graphql.Marshaler {
-	return ec._DriverInfo(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNDriverInfo2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.DriverInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNDistrictTenTypeIllegalData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictTenTypeIllegalDataᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.DistrictTenTypeIllegalData) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -10617,7 +23483,7 @@ func (ec *executionContext) marshalNDriverInfo2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNDriverInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, sel, v[i])
+			ret[i] = ec.marshalNDistrictTenTypeIllegalData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictTenTypeIllegalData(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10630,7 +23496,105 @@ func (ec *executionContext) marshalNDriverInfo2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋ
 	return ret
 }
 
-func (ec *executionContext) marshalNDriverInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx context.Context, sel ast.SelectionSet, v *model.DriverInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNDistrictTenTypeIllegalData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictTenTypeIllegalData(ctx context.Context, sel ast.SelectionSet, v *model.DistrictTenTypeIllegalData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._DistrictTenTypeIllegalData(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNDriverDrinkAndDrugData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverDrinkAndDrugDataᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.DriverDrinkAndDrugData) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNDriverDrinkAndDrugData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverDrinkAndDrugData(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNDriverDrinkAndDrugData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverDrinkAndDrugData(ctx context.Context, sel ast.SelectionSet, v *model.DriverDrinkAndDrugData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._DriverDrinkAndDrugData(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNDriverInfo2keyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx context.Context, sel ast.SelectionSet, v model.DriverInfo) graphql.Marshaler {
+	return ec._DriverInfo(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDriverInfo2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.DriverInfo) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNDriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNDriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx context.Context, sel ast.SelectionSet, v *model.DriverInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -10638,6 +23602,177 @@ func (ec *executionContext) marshalNDriverInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkey
 		return graphql.Null
 	}
 	return ec._DriverInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNDriverThreeScoringCycleData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverThreeScoringCycleDataᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.DriverThreeScoringCycleData) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNDriverThreeScoringCycleData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverThreeScoringCycleData(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNDriverThreeScoringCycleData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverThreeScoringCycleData(ctx context.Context, sel ast.SelectionSet, v *model.DriverThreeScoringCycleData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._DriverThreeScoringCycleData(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	res, err := graphql.UnmarshalFloat(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloat(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNFourTypeKeyVehicleViolationClear2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐFourTypeKeyVehicleViolationClearᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.FourTypeKeyVehicleViolationClear) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNFourTypeKeyVehicleViolationClear2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐFourTypeKeyVehicleViolationClear(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNFourTypeKeyVehicleViolationClear2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐFourTypeKeyVehicleViolationClear(ctx context.Context, sel ast.SelectionSet, v *model.FourTypeKeyVehicleViolationClear) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._FourTypeKeyVehicleViolationClear(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNIllegalRateOfVehicle2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐIllegalRateOfVehicleᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.IllegalRateOfVehicle) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNIllegalRateOfVehicle2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐIllegalRateOfVehicle(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNIllegalRateOfVehicle2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐIllegalRateOfVehicle(ctx context.Context, sel ast.SelectionSet, v *model.IllegalRateOfVehicle) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._IllegalRateOfVehicle(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
@@ -10655,19 +23790,123 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNNewDriverInfo2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewDriverInfo(ctx context.Context, v interface{}) (model.NewDriverInfo, error) {
+func (ec *executionContext) unmarshalNNewDriverInfo2keyVehicleSupervisionᚋgraphᚋmodelᚐNewDriverInfo(ctx context.Context, v interface{}) (model.NewDriverInfo, error) {
 	res, err := ec.unmarshalInputNewDriverInfo(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNNewVehicleDriverBinding2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleDriverBinding(ctx context.Context, v interface{}) (model.NewVehicleDriverBinding, error) {
+func (ec *executionContext) unmarshalNNewVehicleDriverBinding2keyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleDriverBinding(ctx context.Context, v interface{}) (model.NewVehicleDriverBinding, error) {
 	res, err := ec.unmarshalInputNewVehicleDriverBinding(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNNewVehicleInfo2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleInfo(ctx context.Context, v interface{}) (model.NewVehicleInfo, error) {
+func (ec *executionContext) unmarshalNNewVehicleInfo2keyVehicleSupervisionᚋgraphᚋmodelᚐNewVehicleInfo(ctx context.Context, v interface{}) (model.NewVehicleInfo, error) {
 	res, err := ec.unmarshalInputNewVehicleInfo(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPoint2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v *model.Point) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Point(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSingleCarIllegalStatistics2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSingleCarIllegalStatisticsᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SingleCarIllegalStatistics) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNSingleCarIllegalStatistics2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSingleCarIllegalStatistics(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNSingleCarIllegalStatistics2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSingleCarIllegalStatistics(ctx context.Context, sel ast.SelectionSet, v *model.SingleCarIllegalStatistics) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SingleCarIllegalStatistics(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSmsRemindLog2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSmsRemindLogᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.SmsRemindLog) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNSmsRemindLog2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSmsRemindLog(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNSmsRemindLog2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSmsRemindLog(ctx context.Context, sel ast.SelectionSet, v *model.SmsRemindLog) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SmsRemindLog(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -10700,62 +23939,11 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUploadᚄ(ctx context.Context, v interface{}) ([]*graphql.Upload, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]*graphql.Upload, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
+func (ec *executionContext) marshalNVehicleAlarmData2keyVehicleSupervisionᚋgraphᚋmodelᚐVehicleAlarmData(ctx context.Context, sel ast.SelectionSet, v model.VehicleAlarmData) graphql.Marshaler {
+	return ec._VehicleAlarmData(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUploadᚄ(ctx context.Context, sel ast.SelectionSet, v []*graphql.Upload) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalNUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, sel, v[i])
-	}
-
-	return ret
-}
-
-func (ec *executionContext) unmarshalNUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v interface{}) (*graphql.Upload, error) {
-	res, err := graphql.UnmarshalUpload(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v *graphql.Upload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := graphql.MarshalUpload(*v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) marshalNVehicleDriverBinding2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx context.Context, sel ast.SelectionSet, v model.VehicleDriverBinding) graphql.Marshaler {
-	return ec._VehicleDriverBinding(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNVehicleDriverBinding2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBindingᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.VehicleDriverBinding) graphql.Marshaler {
+func (ec *executionContext) marshalNVehicleAlarmData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleAlarmDataᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.VehicleAlarmData) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -10779,7 +23967,7 @@ func (ec *executionContext) marshalNVehicleDriverBinding2ᚕᚖlaiᚗcomᚋgqlge
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNVehicleDriverBinding2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx, sel, v[i])
+			ret[i] = ec.marshalNVehicleAlarmData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleAlarmData(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10792,7 +23980,58 @@ func (ec *executionContext) marshalNVehicleDriverBinding2ᚕᚖlaiᚗcomᚋgqlge
 	return ret
 }
 
-func (ec *executionContext) marshalNVehicleDriverBinding2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx context.Context, sel ast.SelectionSet, v *model.VehicleDriverBinding) graphql.Marshaler {
+func (ec *executionContext) marshalNVehicleAlarmData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleAlarmData(ctx context.Context, sel ast.SelectionSet, v *model.VehicleAlarmData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._VehicleAlarmData(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNVehicleDriverBinding2keyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx context.Context, sel ast.SelectionSet, v model.VehicleDriverBinding) graphql.Marshaler {
+	return ec._VehicleDriverBinding(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNVehicleDriverBinding2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBindingᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.VehicleDriverBinding) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNVehicleDriverBinding2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNVehicleDriverBinding2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBinding(ctx context.Context, sel ast.SelectionSet, v *model.VehicleDriverBinding) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -10802,11 +24041,11 @@ func (ec *executionContext) marshalNVehicleDriverBinding2ᚖlaiᚗcomᚋgqlgen_s
 	return ec._VehicleDriverBinding(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNVehicleInfo2laiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx context.Context, sel ast.SelectionSet, v model.VehicleInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNVehicleInfo2keyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx context.Context, sel ast.SelectionSet, v model.VehicleInfo) graphql.Marshaler {
 	return ec._VehicleInfo(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNVehicleInfo2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.VehicleInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNVehicleInfo2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.VehicleInfo) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -10830,7 +24069,7 @@ func (ec *executionContext) marshalNVehicleInfo2ᚕᚖlaiᚗcomᚋgqlgen_study�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNVehicleInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx, sel, v[i])
+			ret[i] = ec.marshalNVehicleInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -10843,7 +24082,7 @@ func (ec *executionContext) marshalNVehicleInfo2ᚕᚖlaiᚗcomᚋgqlgen_study�
 	return ret
 }
 
-func (ec *executionContext) marshalNVehicleInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx context.Context, sel ast.SelectionSet, v *model.VehicleInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNVehicleInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx context.Context, sel ast.SelectionSet, v *model.VehicleInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -10851,6 +24090,100 @@ func (ec *executionContext) marshalNVehicleInfo2ᚖlaiᚗcomᚋgqlgen_studyᚋke
 		return graphql.Null
 	}
 	return ec._VehicleInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNVehicleViolationDetails2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationDetailsᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.VehicleViolationDetails) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNVehicleViolationDetails2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationDetails(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNVehicleViolationDetails2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationDetails(ctx context.Context, sel ast.SelectionSet, v *model.VehicleViolationDetails) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._VehicleViolationDetails(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNVehicleViolationRankData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationRankDataᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.VehicleViolationRankData) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNVehicleViolationRankData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationRankData(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNVehicleViolationRankData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationRankData(ctx context.Context, sel ast.SelectionSet, v *model.VehicleViolationRankData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._VehicleViolationRankData(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -11082,6 +24415,22 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
+func (ec *executionContext) unmarshalOAlarmType2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐAlarmType(ctx context.Context, v interface{}) (*model.AlarmType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.AlarmType)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOAlarmType2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐAlarmType(ctx context.Context, sel ast.SelectionSet, v *model.AlarmType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -11106,7 +24455,54 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) unmarshalODataPage2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx context.Context, v interface{}) (*model.DataPage, error) {
+func (ec *executionContext) marshalOCycleViolationData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐCycleViolationData(ctx context.Context, sel ast.SelectionSet, v []*model.CycleViolationData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOCycleViolationData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐCycleViolationData(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOCycleViolationData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐCycleViolationData(ctx context.Context, sel ast.SelectionSet, v *model.CycleViolationData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CycleViolationData(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalODataPage2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDataPage(ctx context.Context, v interface{}) (*model.DataPage, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11114,7 +24510,7 @@ func (ec *executionContext) unmarshalODataPage2ᚖlaiᚗcomᚋgqlgen_studyᚋkey
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalODateRange2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx context.Context, v interface{}) (*model.DateRange, error) {
+func (ec *executionContext) unmarshalODateRange2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDateRange(ctx context.Context, v interface{}) (*model.DateRange, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11122,7 +24518,38 @@ func (ec *executionContext) unmarshalODateRange2ᚖlaiᚗcomᚋgqlgen_studyᚋke
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalODriverDataSort2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverDataSort(ctx context.Context, v interface{}) (*model.DriverDataSort, error) {
+func (ec *executionContext) marshalODisputeViolationRecord2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDisputeViolationRecord(ctx context.Context, sel ast.SelectionSet, v *model.DisputeViolationRecord) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DisputeViolationRecord(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalODistrictTenTypeIllegalDataFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictTenTypeIllegalDataFilter(ctx context.Context, v interface{}) (*model.DistrictTenTypeIllegalDataFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDistrictTenTypeIllegalDataFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalODistrictVehicleViolationHandleListFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictVehicleViolationHandleListFilter(ctx context.Context, v interface{}) (*model.DistrictVehicleViolationHandleListFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDistrictVehicleViolationHandleListFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalODistrictVehicleViolationListFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDistrictVehicleViolationListFilter(ctx context.Context, v interface{}) (*model.DistrictVehicleViolationListFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDistrictVehicleViolationListFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalODriverDataSort2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverDataSort(ctx context.Context, v interface{}) (*model.DriverDataSort, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11130,18 +24557,49 @@ func (ec *executionContext) unmarshalODriverDataSort2ᚖlaiᚗcomᚋgqlgen_study
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalODriverIdentity2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverIdentity(ctx context.Context, sel ast.SelectionSet, v *model.DriverIdentity) graphql.Marshaler {
+func (ec *executionContext) unmarshalODriverDrinkAndDrugDataFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverDrinkAndDrugDataFilter(ctx context.Context, v interface{}) (*model.DriverDrinkAndDrugDataFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDriverDrinkAndDrugDataFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalODriverIdentity2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverIdentity(ctx context.Context, sel ast.SelectionSet, v *model.DriverIdentity) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._DriverIdentity(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalODriverInfoFilter2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfoFilter(ctx context.Context, v interface{}) (*model.DriverInfoFilter, error) {
+func (ec *executionContext) marshalODriverInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfo(ctx context.Context, sel ast.SelectionSet, v *model.DriverInfo) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DriverInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalODriverInfoFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverInfoFilter(ctx context.Context, v interface{}) (*model.DriverInfoFilter, error) {
 	if v == nil {
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputDriverInfoFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalODriverThreeScoringCycleDataFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverThreeScoringCycleDataFilter(ctx context.Context, v interface{}) (*model.DriverThreeScoringCycleDataFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDriverThreeScoringCycleDataFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalODriverViolationListFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐDriverViolationListFilter(ctx context.Context, v interface{}) (*model.DriverViolationListFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDriverViolationListFilter(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -11160,6 +24618,69 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 	return graphql.MarshalFloat(*v)
 }
 
+func (ec *executionContext) marshalOFourTypeKeyVehicleViolation2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐFourTypeKeyVehicleViolation(ctx context.Context, sel ast.SelectionSet, v []*model.FourTypeKeyVehicleViolation) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOFourTypeKeyVehicleViolation2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐFourTypeKeyVehicleViolation(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOFourTypeKeyVehicleViolation2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐFourTypeKeyVehicleViolation(ctx context.Context, sel ast.SelectionSet, v *model.FourTypeKeyVehicleViolation) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._FourTypeKeyVehicleViolation(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOFourTypeKeyVehicleViolationClearFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐFourTypeKeyVehicleViolationClearFilter(ctx context.Context, v interface{}) (*model.FourTypeKeyVehicleViolationClearFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputFourTypeKeyVehicleViolationClearFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOIllegalRateOfVehicleFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐIllegalRateOfVehicleFilter(ctx context.Context, v interface{}) (*model.IllegalRateOfVehicleFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputIllegalRateOfVehicleFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
 	if v == nil {
 		return nil, nil
@@ -11175,7 +24696,23 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return graphql.MarshalInt(*v)
 }
 
-func (ec *executionContext) unmarshalOSortDirection2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx context.Context, v interface{}) (*model.SortDirection, error) {
+func (ec *executionContext) unmarshalOSingleCarIllegalStatisticsFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSingleCarIllegalStatisticsFilter(ctx context.Context, v interface{}) (*model.SingleCarIllegalStatisticsFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputSingleCarIllegalStatisticsFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOSmsRemindLogFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSmsRemindLogFilter(ctx context.Context, v interface{}) (*model.SmsRemindLogFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputSmsRemindLogFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx context.Context, v interface{}) (*model.SortDirection, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11184,14 +24721,30 @@ func (ec *executionContext) unmarshalOSortDirection2ᚖlaiᚗcomᚋgqlgen_study�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOSortDirection2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx context.Context, sel ast.SelectionSet, v *model.SortDirection) graphql.Marshaler {
+func (ec *executionContext) marshalOSortDirection2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortDirection(ctx context.Context, sel ast.SelectionSet, v *model.SortDirection) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) unmarshalOSortableDriverField2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableDriverField(ctx context.Context, v interface{}) (*model.SortableDriverField, error) {
+func (ec *executionContext) unmarshalOSortableBindingField2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableBindingField(ctx context.Context, v interface{}) (*model.SortableBindingField, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.SortableBindingField)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOSortableBindingField2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableBindingField(ctx context.Context, sel ast.SelectionSet, v *model.SortableBindingField) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) unmarshalOSortableDriverField2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableDriverField(ctx context.Context, v interface{}) (*model.SortableDriverField, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11200,14 +24753,14 @@ func (ec *executionContext) unmarshalOSortableDriverField2ᚖlaiᚗcomᚋgqlgen_
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOSortableDriverField2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableDriverField(ctx context.Context, sel ast.SelectionSet, v *model.SortableDriverField) graphql.Marshaler {
+func (ec *executionContext) marshalOSortableDriverField2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableDriverField(ctx context.Context, sel ast.SelectionSet, v *model.SortableDriverField) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) unmarshalOSortableVehicleField2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableVehicleField(ctx context.Context, v interface{}) (*model.SortableVehicleField, error) {
+func (ec *executionContext) unmarshalOSortableVehicleField2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableVehicleField(ctx context.Context, v interface{}) (*model.SortableVehicleField, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -11216,7 +24769,7 @@ func (ec *executionContext) unmarshalOSortableVehicleField2ᚖlaiᚗcomᚋgqlgen
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOSortableVehicleField2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableVehicleField(ctx context.Context, sel ast.SelectionSet, v *model.SortableVehicleField) graphql.Marshaler {
+func (ec *executionContext) marshalOSortableVehicleField2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐSortableVehicleField(ctx context.Context, sel ast.SelectionSet, v *model.SortableVehicleField) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -11283,38 +24836,7 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return graphql.MarshalString(*v)
 }
 
-func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalTime(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalTime(*v)
-}
-
-func (ec *executionContext) unmarshalOVehicleDataSort2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDataSort(ctx context.Context, v interface{}) (*model.VehicleDataSort, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputVehicleDataSort(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOVehicleInfoFilter2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfoFilter(ctx context.Context, v interface{}) (*model.VehicleInfoFilter, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputVehicleInfoFilter(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOVehicleMaintenance2ᚕᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleMaintenance(ctx context.Context, sel ast.SelectionSet, v []*model.VehicleMaintenance) graphql.Marshaler {
+func (ec *executionContext) marshalOTenTypeIllegalData2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐTenTypeIllegalData(ctx context.Context, sel ast.SelectionSet, v []*model.TenTypeIllegalData) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -11341,7 +24863,7 @@ func (ec *executionContext) marshalOVehicleMaintenance2ᚕᚖlaiᚗcomᚋgqlgen_
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOVehicleMaintenance2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleMaintenance(ctx, sel, v[i])
+			ret[i] = ec.marshalOTenTypeIllegalData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐTenTypeIllegalData(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11354,11 +24876,200 @@ func (ec *executionContext) marshalOVehicleMaintenance2ᚕᚖlaiᚗcomᚋgqlgen_
 	return ret
 }
 
-func (ec *executionContext) marshalOVehicleMaintenance2ᚖlaiᚗcomᚋgqlgen_studyᚋkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleMaintenance(ctx context.Context, sel ast.SelectionSet, v *model.VehicleMaintenance) graphql.Marshaler {
+func (ec *executionContext) marshalOTenTypeIllegalData2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐTenTypeIllegalData(ctx context.Context, sel ast.SelectionSet, v *model.TenTypeIllegalData) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TenTypeIllegalData(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalTime(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalTime(*v)
+}
+
+func (ec *executionContext) unmarshalOUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v interface{}) ([]*graphql.Upload, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*graphql.Upload, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOUpload2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v []*graphql.Upload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v interface{}) (*graphql.Upload, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalUpload(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v *graphql.Upload) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalUpload(*v)
+}
+
+func (ec *executionContext) marshalOVIO_CODEWFDM2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVioCodewfdm(ctx context.Context, sel ast.SelectionSet, v *model.VioCodewfdm) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._VIO_CODEWFDM(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOVehicleDataSort2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDataSort(ctx context.Context, v interface{}) (*model.VehicleDataSort, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputVehicleDataSort(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOVehicleDriverBindingDataSort2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBindingDataSort(ctx context.Context, v interface{}) (*model.VehicleDriverBindingDataSort, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputVehicleDriverBindingDataSort(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOVehicleDriverBindingFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleDriverBindingFilter(ctx context.Context, v interface{}) (*model.VehicleDriverBindingFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputVehicleDriverBindingFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOVehicleInfo2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfo(ctx context.Context, sel ast.SelectionSet, v *model.VehicleInfo) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._VehicleInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOVehicleInfoFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleInfoFilter(ctx context.Context, v interface{}) (*model.VehicleInfoFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputVehicleInfoFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOVehicleMaintenance2ᚕᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleMaintenance(ctx context.Context, sel ast.SelectionSet, v []*model.VehicleMaintenance) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOVehicleMaintenance2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleMaintenance(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOVehicleMaintenance2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleMaintenance(ctx context.Context, sel ast.SelectionSet, v *model.VehicleMaintenance) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._VehicleMaintenance(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOVehicleViolationDetailListFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationDetailListFilter(ctx context.Context, v interface{}) (*model.VehicleViolationDetailListFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputVehicleViolationDetailListFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOVehicleViolationDetails2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationDetails(ctx context.Context, sel ast.SelectionSet, v *model.VehicleViolationDetails) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._VehicleViolationDetails(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOVehicleViolationRankDataFilter2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationRankDataFilter(ctx context.Context, v interface{}) (*model.VehicleViolationRankDataFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputVehicleViolationRankDataFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOVehicleViolationScoringItems2ᚖkeyVehicleSupervisionᚋgraphᚋmodelᚐVehicleViolationScoringItems(ctx context.Context, sel ast.SelectionSet, v *model.VehicleViolationScoringItems) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._VehicleViolationScoringItems(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

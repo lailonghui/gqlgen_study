@@ -8,8 +8,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"lai.com/gqlgen_study/keyVehicleSupervision02/graph/generated"
-	"lai.com/gqlgen_study/keyVehicleSupervision02/graph/resolvers"
+	"lai.com/gqlgen_study/keyVehicleSupervision03/graph/generated"
+	"lai.com/gqlgen_study/keyVehicleSupervision03/graph/resolvers"
 	"net/http"
 	"time"
 )
@@ -21,9 +21,9 @@ func main() {
 	r := gin.Default()
 
 	r.POST("/query", graphqlHandler())
-	r.POST("/delete", graphqlHandler())
+	//r.POST("/delete", graphqlHandler())
 	r.GET("/", playgroundHandler())
-	r.Run(":8080")
+	r.Run(":8081")
 }
 
 // Defining the Graphql handler

@@ -3,15 +3,27 @@
   <component name="ChangeListManager">
     <list default="true" id="d3a3163b-7a54-4fb1-984d-59eb068fa880" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph/graphqls/vehicle.graphqls" beforeDir="false" afterPath="$PROJECT_DIR$/graph/graphqls/vehicle.graphqls" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graph/generated/generated.go" beforeDir="false" afterPath="$PROJECT_DIR$/graph/generated/generated.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graph/model/models_gen.go" beforeDir="false" afterPath="$PROJECT_DIR$/graph/model/models_gen.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graph/resolvers/driver.resolvers.go" beforeDir="false" afterPath="$PROJECT_DIR$/graph/resolvers/driver.resolvers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graph/resolvers/vehicle.resolvers.go" beforeDir="false" afterPath="$PROJECT_DIR$/graph/resolvers/vehicle.resolvers.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision02/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision02/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/generated/generated.go" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/generated/generated.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/graphqls/driver.graphqls" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/graphqls/driver.graphqls" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/graphqls/vehicle.graphqls" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/graphqls/vehicle.graphqls" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/model/models_gen.go" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/model/models_gen.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/resolvers/driver.resolvers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/resolvers/driver.resolvers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/resolvers/vehicle.resolvers.go" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/resolvers/vehicle.resolvers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision02/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision02/server.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/graphqls/schema.graphqls" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision02/graph/graphqls/schema.graphqls" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision03/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision03/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/gqlgen.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision03/gqlgen.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/generated/generated.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/graphqls/alarmInfo.graphqls" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/graphqls/driver.graphqls" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/graphqls/schema.graphqls" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/graphqls/schema.graphqls" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/graphqls/vehicle.graphqls" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/graphqls/vehicleViolation.graphqls" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/model/models_gen.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/resolvers/alarmInfo.resolvers.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/resolvers/driver.resolvers.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/resolvers/vehicle.resolvers.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/graph/resolvers/vehicleViolation.resolvers.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../keyVehicleSupervision03/server.go" beforeDir="false" afterPath="$PROJECT_DIR$/../keyVehicleSupervision03/server.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -30,57 +42,56 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/graph/graphqls/schema.graphqls">
+        <entry file="file://$PROJECT_DIR$/server.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="280">
-              <caret line="14" column="9" selection-start-line="14" selection-start-column="9" selection-end-line="14" selection-end-column="9" />
+            <state relative-caret-position="480">
+              <caret line="36" column="33" selection-start-line="36" selection-start-column="33" selection-end-line="36" selection-end-column="33" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/graph/resolvers/driver.resolvers.go">
+        <entry file="file://$PROJECT_DIR$/graph/resolvers/alarmInfo.resolvers.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#206#293#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="160">
+              <caret line="8" column="37" selection-start-line="8" selection-start-column="16" selection-end-line="8" selection-end-column="37" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/graph/graphqls/vehicleViolation.graphqls">
+        <entry file="file://$PROJECT_DIR$/go.sum">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gqlgen.yml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="11560">
-              <caret line="578" column="22" selection-start-line="578" selection-start-column="22" selection-end-line="578" selection-end-column="22" />
+            <state relative-caret-position="740">
+              <caret line="37" column="26" selection-start-line="37" selection-start-column="5" selection-end-line="37" selection-end-column="26" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/graph/graphqls/alarmInfo.graphqls">
+        <entry file="file://$PROJECT_DIR$/graph/resolvers/vehicle.resolvers.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="820">
-              <caret line="41" column="10" selection-start-line="41" selection-start-column="10" selection-end-line="41" selection-end-column="10" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/graph/graphqls/driver.graphqls">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4560">
-              <caret line="228" column="23" selection-start-line="227" selection-start-column="4" selection-end-line="228" selection-end-column="23" />
+            <state relative-caret-position="180">
+              <caret line="14" column="1" selection-start-line="14" selection-start-column="1" selection-end-line="14" selection-end-column="1" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/graph/graphqls/vehicle.graphqls">
+        <entry file="file://$PROJECT_DIR$/graph/resolvers/vehicleViolation.resolvers.go">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/graph/resolvers/driver.resolvers.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="421">
-              <caret line="192" selection-start-line="192" selection-end-line="192" />
+            <state relative-caret-position="140">
+              <caret line="11" column="89" selection-start-line="11" selection-start-column="76" selection-end-line="11" selection-end-column="89" />
             </state>
           </provider>
         </entry>
@@ -136,9 +147,7 @@
         <option value="$PROJECT_DIR$/graph/model/models_gen.go" />
         <option value="$PROJECT_DIR$/graph/graphqls/fileUpload.graphqls" />
         <option value="$PROJECT_DIR$/graph/resolvers/fileUpload.resolvers.go" />
-        <option value="$PROJECT_DIR$/go.mod" />
         <option value="$PROJECT_DIR$/graph/resolvers/resolver.go" />
-        <option value="$PROJECT_DIR$/gqlgen.yml" />
         <option value="$PROJECT_DIR$/graph/dataloader/dataloders.go" />
         <option value="$PROJECT_DIR$/graph/dataloader/userloader_gen.go" />
         <option value="$PROJECT_DIR$/server.go" />
@@ -148,6 +157,8 @@
         <option value="$PROJECT_DIR$/graph/graphqls/alarmInfo.graphqls" />
         <option value="$PROJECT_DIR$/graph/graphqls/vehicleViolation.graphqls" />
         <option value="$PROJECT_DIR$/graph/graphqls/vehicle.graphqls" />
+        <option value="$PROJECT_DIR$/gqlgen.yml" />
+        <option value="$PROJECT_DIR$/go.mod" />
       </list>
     </option>
   </component>
@@ -179,19 +190,7 @@
               <item name="keyVehicleSupervision" type="b2602c69:ProjectViewProjectNode" />
               <item name="keyVehicleSupervision" type="462c0819:PsiDirectoryNode" />
               <item name="graph" type="462c0819:PsiDirectoryNode" />
-              <item name="dataloader" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="keyVehicleSupervision" type="b2602c69:ProjectViewProjectNode" />
-              <item name="keyVehicleSupervision" type="462c0819:PsiDirectoryNode" />
-              <item name="graph" type="462c0819:PsiDirectoryNode" />
               <item name="graphqls" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="keyVehicleSupervision" type="b2602c69:ProjectViewProjectNode" />
-              <item name="keyVehicleSupervision" type="462c0819:PsiDirectoryNode" />
-              <item name="graph" type="462c0819:PsiDirectoryNode" />
-              <item name="model" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="keyVehicleSupervision" type="b2602c69:ProjectViewProjectNode" />
@@ -213,7 +212,7 @@
     <property name="editor.config.ad.shown" value="true" />
     <property name="go.gopath.indexing.explicitly.defined" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../keyVehicleSupervision02" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../keyVehicleSupervision03" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="go.vgo" />
@@ -271,7 +270,7 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49838188" visible="true" weight="0.27132195" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49838188" visible="true" weight="0.2803838" />
       <window_info id="Structure" order="1" sideWeight="0.50161815" side_tool="true" weight="0.25266525" />
       <window_info id="Favorites" order="2" sideWeight="0.50161815" side_tool="true" weight="0.25266525" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -313,9 +312,6 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/graph/model/chatroom.go" />
     <entry file="file://$PROJECT_DIR$/graph/userloader_gen.go" />
-    <entry file="file://$PROJECT_DIR$/go.sum">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/../../../../pkg/mod/github.com/99designs/gqlgen@v0.13.0/example/dataloader/dataloaders.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="184">
@@ -359,24 +355,10 @@
     <entry file="file://$PROJECT_DIR$/graph/graphqls/User.graphqls" />
     <entry file="file://$PROJECT_DIR$/graph/graphqls/fileUpload.graphqls" />
     <entry file="file://$PROJECT_DIR$/graph/resolvers/fileUpload.resolvers.go" />
-    <entry file="file://$PROJECT_DIR$/go.mod">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="49" selection-start-column="28" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Documents/WeChat Files/wxid_ywwhcb0w7mbf22/FileStorage/File/2020-11/driving_log.graphqls">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2840">
           <caret line="172" column="20" selection-start-line="172" selection-start-column="20" selection-end-line="172" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gqlgen.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="312">
-          <caret line="37" column="47" selection-start-line="37" selection-start-column="26" selection-end-line="37" selection-end-column="47" />
         </state>
       </provider>
     </entry>
@@ -405,13 +387,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/graph/resolvers/schema.resolvers.go" />
-    <entry file="file://$PROJECT_DIR$/graph/resolvers/vehicle.resolvers.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="280">
-          <caret line="20" lean-forward="true" selection-start-line="20" selection-end-line="20" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/graph/model/models_gen.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="400">
@@ -419,29 +394,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/server.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="275">
-          <caret line="51" column="8" selection-start-line="51" selection-start-column="8" selection-end-line="51" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/graph/resolvers/resolver.go">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/graph/graphqls/schema.graphqls">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="280">
           <caret line="14" column="9" selection-start-line="14" selection-start-column="9" selection-end-line="14" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/graph/resolvers/driver.resolvers.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#206#293#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -461,7 +417,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/graph/graphqls/driver.graphqls">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4560">
+        <state relative-caret-position="821">
           <caret line="228" column="23" selection-start-line="227" selection-start-column="4" selection-end-line="228" selection-end-column="23" />
         </state>
       </provider>
@@ -472,6 +428,57 @@
           <caret line="192" selection-start-line="192" selection-end-line="192" />
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graph/resolvers/driver.resolvers.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="140">
+          <caret line="11" column="89" selection-start-line="11" selection-start-column="76" selection-end-line="11" selection-end-column="89" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="36" column="33" selection-start-line="36" selection-start-column="33" selection-end-line="36" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/go.sum">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graph/resolvers/resolver.go">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graph/resolvers/vehicle.resolvers.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="14" column="1" selection-start-line="14" selection-start-column="1" selection-end-line="14" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graph/resolvers/alarmInfo.resolvers.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="160">
+          <caret line="8" column="37" selection-start-line="8" selection-start-column="16" selection-end-line="8" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/go.mod">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="12" column="30" selection-start-line="12" selection-start-column="30" selection-end-line="12" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gqlgen.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="740">
+          <caret line="37" column="26" selection-start-line="37" selection-start-column="5" selection-end-line="37" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/graph/resolvers/vehicleViolation.resolvers.go">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
 </project>
